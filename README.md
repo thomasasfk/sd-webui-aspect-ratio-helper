@@ -21,10 +21,11 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
   - Determines whether the 'Aspect Ratio Helper' accordion expands by default
 - Show maximum width of height button
 - Maximum width or height default
-- Show percentage buttons
-- Percentage buttons
+- Show predefined percentage buttons
+- Predefined percentage buttons
   - Comma separated list of percentages
   - i.e `25, 50, 75, 125, 150, 175, 200` `50, 125, 300` etc.
+- Predefined percentage display format
 
 ![settings.png](docs%2Fsettings.png)
 
