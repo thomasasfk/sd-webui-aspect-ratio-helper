@@ -40,15 +40,14 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
 
 Developed using existing [AUTOMATIC1111 webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) dependencies.
 
-However - for running unit tests, we use pytest.
+However - for running unit tests, we use pytest:
 
 ```bash
 pip install pytest
 ```
 
 ## Testing:
-
-- From the root of the repository run:
+From the root of the repository run:
 ```bash
 pytest
 ```
