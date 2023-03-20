@@ -1,5 +1,3 @@
-import contextlib
-
 import gradio as gr
 from modules import shared
 
@@ -18,6 +16,7 @@ from aspect_ratio_helper._constants import _OPT_KEY_TO_DEFAULT_MAP
 from aspect_ratio_helper._util import _display_minus_and_plus
 from aspect_ratio_helper._util import _display_multiplication
 from aspect_ratio_helper._util import _display_raw_percentage
+from aspect_ratio_helper._util import _safe_opt_util
 
 _PREDEFINED_PERCENTAGES_DISPLAY_MAP = {
     _DEFAULT_PERCENTAGES_DISPLAY_KEY: _display_minus_and_plus,
@@ -26,14 +25,8 @@ _PREDEFINED_PERCENTAGES_DISPLAY_MAP = {
 }
 
 
-# todo: add test coverage to this?..
 def _safe_opt(key):
-    # attempt to retrieve key from shared options
-    with contextlib.suppress(AttributeError):
-        return shared.opts.__getattr__(key)
-
-    # attempt to retrieve default, and last resort the constant default
-    return shared.opts.get_default(key) or _OPT_KEY_TO_DEFAULT_MAP.get(key)
+    return _safe_opt_util(shared.opts, key)
 
 
 def on_ui_settings():

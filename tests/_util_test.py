@@ -5,6 +5,7 @@ from aspect_ratio_helper._util import _display_multiplication
 from aspect_ratio_helper._util import _display_raw_percentage
 from aspect_ratio_helper._util import _MAX_DIMENSION
 from aspect_ratio_helper._util import _MIN_DIMENSION
+from aspect_ratio_helper._util import _safe_opt_util
 from aspect_ratio_helper._util import _scale_by_percentage
 from aspect_ratio_helper._util import _scale_dimensions_to_max_dimension
 
@@ -149,3 +150,55 @@ def test_scale_dimensions_to_max_dimension(
     assert _scale_dimensions_to_max_dimension(
         width, height, max_dim,
     ) == expected
+
+
+class SharedOpts:
+    def __init__(self, options=None, defaults=None):
+        self.options = options or {}
+        self.defaults = defaults or {}
+
+    def __getattr__(self, key):
+        try:
+            return self.options[key]
+        except KeyError:
+            raise AttributeError()
+
+    def get_default(self, key):
+        return self.defaults.get(key, None)
+
+
+def test_safe_opt_util():
+    shared_opts = SharedOpts(options={'key': 'value'})
+    assert _safe_opt_util(shared_opts, 'key') == 'value'
+
+
+def test_safe_opt_util_default_a(monkeypatch):
+    monkeypatch.setattr(
+        'aspect_ratio_helper._util._OPT_KEY_TO_DEFAULT_MAP',
+        {'key': 'default_b'},
+    )
+    shared_opts = SharedOpts(
+        defaults={'key': 'default_a'},
+    )
+    assert _safe_opt_util(shared_opts, 'key') == 'default_a'
+
+
+def test_safe_opt_util_default_b(monkeypatch):
+    monkeypatch.setattr(
+        'aspect_ratio_helper._util._OPT_KEY_TO_DEFAULT_MAP',
+        {'key': 'default_b'},
+    )
+    shared_opts = SharedOpts(defaults={'key': None})
+    assert _safe_opt_util(shared_opts, 'key') == 'default_b'
+
+
+@pytest.mark.parametrize(
+    'options', ({'key': None}, {}),
+)
+def test_safe_opt_safe_return_no_defaults_b(monkeypatch, options):
+    monkeypatch.setattr(
+        'aspect_ratio_helper._util._OPT_KEY_TO_DEFAULT_MAP',
+        {},
+    )
+    shared_opts = SharedOpts(options=options)
+    assert _safe_opt_util(shared_opts, 'unknown_key') is None
