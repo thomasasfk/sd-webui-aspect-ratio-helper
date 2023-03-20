@@ -13,7 +13,6 @@ repos:
       - id: flake8
         additional_dependencies:
           - flake8-bugbear
-          - flake8-import-order
           - flake8-quotes
           - flake8-comprehensions
   - repo: https://github.com/asottile/reorder_python_imports
