@@ -6,9 +6,9 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
 
 ## Main features:
 
-- Scale to maximum width or dimension
-  - Upon clicking, the dimensions will scale the highest value to the maximum configured value
-  - Aspect ratio will be maintained, the smaller or equivalent value will be scaled to match
+- Scale to maximum width or height
+  - Upon clicking, the dimensions will scale according to the configured maximum value
+  - Aspect ratio will be retained, the smaller or equivalent dimension will be scaled to match
 - Scale by percentage
   - Upon clicking, the current dimensions will be multiplied by the given percentage, with aspect ratio maintained
   - i.e `150% of 512x512 = 768x768` `75% of 512x256 = 384x192` etc.
