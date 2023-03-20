@@ -13,8 +13,6 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
   - Upon clicking, the current dimensions will be multiplied by the given percentage, with aspect ratio maintained
   - i.e `150% of 512x512 = 768x768` `75% of 512x256 = 384x192` etc.
 
-Screenshot:
-
 ![user-interface.png](docs%2Fuser-interface.png)
 
 ## Settings:
@@ -22,15 +20,10 @@ Screenshot:
 - Expand by default
   - Determines whether the 'Aspect Ratio Helper' accordion expands by default
 - Show maximum width of height button
-  - Self-explanatory
 - Maximum width or height default
-  - Self-explanatory
 - Show percentage buttons
-  - Self-explanatory
 - Percentage buttons
   - Comma separated list of percentages
   - i.e `25, 50, 75, 125, 150, 175, 200` `50, 125, 300` etc.
-
-Screenshot:
 
 ![settings.png](docs%2Fsettings.png)
