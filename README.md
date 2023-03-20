@@ -19,7 +19,7 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
 
 - Expand by default
   - Determines whether the 'Aspect Ratio Helper' accordion expands by default
-- Show maximum width of height button
+- Show maximum width or height button
 - Maximum width or height default
 - Show percentage buttons
 - Percentage buttons
