@@ -1,3 +1,7 @@
+from aspect_ratio_helper._constants import _MAX_DIMENSION
+from aspect_ratio_helper._constants import _MIN_DIMENSION
+
+
 def _display_multiplication(num):
     return f'x{round(num / 100, 3)}'
 
@@ -11,17 +15,6 @@ def _display_minus_and_plus(num):
     if num > 0:
         return f'+{num}%'
     return f'{num}%'
-
-
-_DEFAULT_DISPLAY_KEY = 'Incremental/decremental percentage (-50%, +50%)'
-_PREDEFINED_PERCENTAGES_DISPLAY_MAP = {
-    _DEFAULT_DISPLAY_KEY: _display_minus_and_plus,
-    'Raw percentage (50%, 150%)': _display_raw_percentage,
-    'Multiplication (x0.5, x1.5)': _display_multiplication,
-}
-
-_MIN_DIMENSION = 64
-_MAX_DIMENSION = 2048
 
 
 def _scale_by_percentage(width, height, pct):

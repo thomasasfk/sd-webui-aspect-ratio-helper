@@ -34,4 +34,4 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
 - Open to suggestions
 - Pull requests are appreciated
 - Write tests if possible and useful
-- Run pre-commit!
+- Run pre-commit

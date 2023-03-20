@@ -1,84 +1,24 @@
-import contextlib
 from functools import partial
 
 import gradio as gr
 from modules import script_callbacks
 from modules import scripts
-from modules import shared
-from modules.shared import opts
 
-from aspect_ratio_helper._util import _DEFAULT_DISPLAY_KEY
-from aspect_ratio_helper._util import _MAX_DIMENSION
-from aspect_ratio_helper._util import _MIN_DIMENSION
-from aspect_ratio_helper._util import _PREDEFINED_PERCENTAGES_DISPLAY_MAP
+from aspect_ratio_helper._constants import _ARH_EXPAND_BY_DEFAULT_KEY
+from aspect_ratio_helper._constants import _ARH_MAX_WIDTH_OR_HEIGHT_KEY
+from aspect_ratio_helper._constants import \
+    _ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY
+from aspect_ratio_helper._constants import _ARH_PREDEFINED_PERCENTAGES_KEY
+from aspect_ratio_helper._constants import _ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY
+from aspect_ratio_helper._constants import _ARH_SHOW_PREDEFINED_PERCENTAGES_KEY
+from aspect_ratio_helper._constants import _EXTENSION_NAME
+from aspect_ratio_helper._constants import _MAX_DIMENSION
+from aspect_ratio_helper._constants import _MIN_DIMENSION
+from aspect_ratio_helper._settings import _PREDEFINED_PERCENTAGES_DISPLAY_MAP
+from aspect_ratio_helper._settings import _safe_opt
+from aspect_ratio_helper._settings import on_ui_settings
 from aspect_ratio_helper._util import _scale_by_percentage
 from aspect_ratio_helper._util import _scale_dimensions_to_max_dimension
-
-
-_EXTENSION_NAME = 'Aspect Ratio Helper'
-
-
-def on_ui_settings():
-    section = 'aspect_ratio_helper', _EXTENSION_NAME
-    shared.opts.add_option(
-        key='arh_expand_by_default',
-        info=shared.OptionInfo(
-            default=False,
-            label='Expand by default',
-            section=section,
-        ),
-    )
-    shared.opts.add_option(
-        key='arh_show_max_width_or_height',
-        info=shared.OptionInfo(
-            default=True,
-            label='Show maximum width or height button',
-            section=section,
-        ),
-    )
-    shared.opts.add_option(
-        key='arh_max_width_or_height',
-        info=shared.OptionInfo(
-            default=_MAX_DIMENSION / 2,
-            label='Maximum width or height default',
-            component=gr.Slider,
-            component_args={
-                'minimum': _MIN_DIMENSION,
-                'maximum': _MAX_DIMENSION,
-                'step': 1,
-            },
-            section=section,
-        ),
-    )
-    shared.opts.add_option(
-        key='arh_show_predefined_percentages',
-        info=shared.OptionInfo(
-            default=True,
-            label='Show predefined percentage buttons',
-            section=section,
-        ),
-    )
-    shared.opts.add_option(
-        key='arh_predefined_percentages',
-        info=shared.OptionInfo(
-            default='25, 50, 75, 125, 150, 175, 200',
-            label='Predefined percentage buttons, applied to dimensions (75, '
-                  '125, 150)',
-            section=section,
-        ),
-    )
-    shared.opts.add_option(
-        key='arh_predefined_percentages_display_key',
-        info=shared.OptionInfo(
-            default=_DEFAULT_DISPLAY_KEY,
-            label='Predefined percentage display format',
-            component=gr.Dropdown,
-            component_args=lambda: {
-                'choices': tuple(_PREDEFINED_PERCENTAGES_DISPLAY_MAP.keys()),
-            },
-            section=section,
-        ),
-    )
 
 
 class AspectRatioStepScript(scripts.Script):
@@ -91,28 +31,29 @@ class AspectRatioStepScript(scripts.Script):
 
     def ui(self, is_img2img):
         if not any([
-            opts.arh_show_max_width_or_height,
-            opts.arh_show_predefined_percentages,
+            _safe_opt(_ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY),
+            _safe_opt(_ARH_SHOW_PREDEFINED_PERCENTAGES_KEY),
         ]):
             return  # return early as no 'show' options enabled
-
         with (
             gr.Group(),
-            gr.Accordion(_EXTENSION_NAME, open=opts.arh_expand_by_default),
-            contextlib.suppress(AttributeError),
+            gr.Accordion(
+                _EXTENSION_NAME,
+                open=_safe_opt(_ARH_EXPAND_BY_DEFAULT_KEY),
+            ),
         ):
             if is_img2img:
                 inputs = outputs = [self.i2i_w, self.i2i_h]
             else:
                 inputs = outputs = [self.t2i_w, self.t2i_h]
 
-            if opts.arh_show_max_width_or_height:
+            if _safe_opt(_ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY):
                 with gr.Row():
                     max_dimension = gr.inputs.Slider(
                         minimum=_MIN_DIMENSION,
                         maximum=_MAX_DIMENSION,
                         step=1,
-                        default=opts.arh_max_width_or_height,
+                        default=_safe_opt(_ARH_MAX_WIDTH_OR_HEIGHT_KEY),
                         label='Maximum width or height (whichever is higher)',
                     )
                     gr.Button(value='Scale to maximum width or height').click(
@@ -121,12 +62,12 @@ class AspectRatioStepScript(scripts.Script):
                         outputs=outputs,
                     )
 
-            if opts.arh_show_predefined_percentages:
+            if _safe_opt(_ARH_SHOW_PREDEFINED_PERCENTAGES_KEY):
                 display_func = _PREDEFINED_PERCENTAGES_DISPLAY_MAP.get(
-                    opts.arh_predefined_percentages_display_key,
+                    _safe_opt(_ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY),
                 )
                 with gr.Column(variant='panel'), gr.Row(variant='compact'):
-                    pps = opts.arh_predefined_percentages
+                    pps = _safe_opt(_ARH_PREDEFINED_PERCENTAGES_KEY)
                     percentages = [
                         abs(int(x)) for x in pps.split(',')
                     ]
