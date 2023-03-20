@@ -1,4 +1,4 @@
-# Aspect Ratio Helper
+# Aspect Ratio Helper  [![pytest](https://github.com/thomasasfk/sd-webui-aspect-ratio-helper/actions/workflows/pytest.yml/badge.svg?branch=main)](https://github.com/thomasasfk/sd-webui-aspect-ratio-helper/actions/workflows/pytest.yml)
 
 Simple extension to easily maintain aspect ratio while changing dimensions.
 
