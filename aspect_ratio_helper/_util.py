@@ -29,29 +29,31 @@ def _scale_by_percentage(width, height, pct):
     step = (pct - 1.0)
     new_width = int(round(width * (1.0 + step)))
     new_height = int(round(new_width / aspect_ratio))
-    if new_width > _MAX_DIMENSION:
-        new_width = _MAX_DIMENSION
-        new_height = int(round(new_width / aspect_ratio))
-    if new_height > _MAX_DIMENSION:
-        new_height = _MAX_DIMENSION
-        new_width = int(round(new_height * aspect_ratio))
-    if new_width < _MIN_DIMENSION:
-        new_width = _MIN_DIMENSION
-        new_height = int(round(new_width / aspect_ratio))
-    if new_height < _MIN_DIMENSION:
-        new_height = _MIN_DIMENSION
-        new_width = int(round(new_height * aspect_ratio))
-    return new_width, new_height
+    return _clamp_to_boundaries(new_width, new_height, aspect_ratio)
 
 
 def _scale_dimensions_to_max_dimension(width, height, max_dim):
-    if max_dim < _MIN_DIMENSION:
-        max_dim = _MIN_DIMENSION
-    elif max_dim > _MAX_DIMENSION:
-        max_dim = _MAX_DIMENSION
-    if max_dim == max(width, height):
-        return width, height
     aspect_ratio = float(width) / float(height)
     if width > height:
-        return max_dim, max(int(round(max_dim / aspect_ratio)), 1)
-    return max(int(round(max_dim * aspect_ratio)), 1), max_dim
+        new_width = max_dim
+        new_height = max(int(round(max_dim / aspect_ratio)), 1)
+    else:
+        new_height = max_dim
+        new_width = max(int(round(max_dim * aspect_ratio)), 1)
+    return _clamp_to_boundaries(new_width, new_height, aspect_ratio)
+
+
+def _clamp_to_boundaries(width, height, aspect_ratio):
+    if width > _MAX_DIMENSION:
+        width = _MAX_DIMENSION
+        height = int(round(width / aspect_ratio))
+    if height > _MAX_DIMENSION:
+        height = _MAX_DIMENSION
+        width = int(round(height * aspect_ratio))
+    if width < _MIN_DIMENSION:
+        width = _MIN_DIMENSION
+        height = int(round(width / aspect_ratio))
+    if height < _MIN_DIMENSION:
+        height = _MIN_DIMENSION
+        width = int(round(height * aspect_ratio))
+    return width, height

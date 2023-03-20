@@ -112,14 +112,34 @@ def test_scale_by_percentage(
             id='scale_from_max_to_min',
         ),
         pytest.param(
+            _MIN_DIMENSION, 32, _MIN_DIMENSION,
+            (128, _MIN_DIMENSION),
+            id='scale_below_min_height_dimension_clamps_retains_ar',
+        ),
+        pytest.param(
+            32, _MIN_DIMENSION, _MIN_DIMENSION,
+            (_MIN_DIMENSION, 128),
+            id='scale_below_min_width_dimension_clamps_retains_ar',
+        ),
+        pytest.param(
+            _MAX_DIMENSION, 4096, _MAX_DIMENSION,
+            (1024, _MAX_DIMENSION),
+            id='scale_above_max_height_dimension_clamps_retains_ar',
+        ),
+        pytest.param(
+            4096, _MAX_DIMENSION, _MAX_DIMENSION,
+            (_MAX_DIMENSION, 1024),
+            id='scale_above_max_width_dimension_clamps_retains_ar',
+        ),
+        pytest.param(
             64, 64, _MIN_DIMENSION - 1,
             (_MIN_DIMENSION, _MIN_DIMENSION),
-            id='scale_below_min_dimension_clamps_retains_ar',
+            id='scale_dimension_below_min_dimension_clamps_retains_ar',
         ),
         pytest.param(
             64, 64, _MAX_DIMENSION + 1,
             (_MAX_DIMENSION, _MAX_DIMENSION),
-            id='scale_above_max_dimension_clamps_retains_ar',
+            id='scale_dimension_above_max_dimension_clamps_retains_ar',
         ),
     ],
 )
