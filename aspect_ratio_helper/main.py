@@ -7,8 +7,14 @@ from modules import scripts
 from modules import shared
 from modules.shared import opts
 
-_MIN_DIMENSION = 64
-_MAX_DIMENSION = 2048
+from aspect_ratio_helper._util import _DEFAULT_DISPLAY_KEY
+from aspect_ratio_helper._util import _MAX_DIMENSION
+from aspect_ratio_helper._util import _MIN_DIMENSION
+from aspect_ratio_helper._util import _PREDEFINED_PERCENTAGES_DISPLAY_MAP
+from aspect_ratio_helper._util import _scale_by_percentage
+from aspect_ratio_helper._util import _scale_dimensions_to_max_dimension
+
+
 _EXTENSION_NAME = 'Aspect Ratio Helper'
 
 
@@ -33,8 +39,14 @@ def on_ui_settings():
     shared.opts.add_option(
         key='arh_max_width_or_height',
         info=shared.OptionInfo(
-            default=1024,
+            default=_MAX_DIMENSION / 2,
             label='Maximum width or height default',
+            component=gr.Slider,
+            component_args={
+                'minimum': _MIN_DIMENSION,
+                'maximum': _MAX_DIMENSION,
+                'step': 1,
+            },
             section=section,
         ),
     )
@@ -42,7 +54,7 @@ def on_ui_settings():
         key='arh_show_predefined_percentages',
         info=shared.OptionInfo(
             default=True,
-            label='Show percentage buttons',
+            label='Show predefined percentage buttons',
             section=section,
         ),
     )
@@ -50,39 +62,23 @@ def on_ui_settings():
         key='arh_predefined_percentages',
         info=shared.OptionInfo(
             default='25, 50, 75, 125, 150, 175, 200',
-            label='Percentage buttons (75, 125, 150)',
+            label='Predefined percentage buttons, applied to dimensions (75, '
+                  '125, 150)',
             section=section,
         ),
     )
-
-
-def _scale_by_percentage(width, height, pct):
-    aspect_ratio = float(width) / float(height)
-    step = (pct - 1.0)
-    new_width = max(int(round(width * (1.0 + step))), 1)
-    new_height = max(int(round(new_width / aspect_ratio)), 1)
-    if new_width > _MAX_DIMENSION:
-        new_width = _MAX_DIMENSION
-        new_height = max(int(round(new_width / aspect_ratio)), 1)
-    if new_height > _MAX_DIMENSION:
-        new_height = _MAX_DIMENSION
-        new_width = max(int(round(new_height * aspect_ratio)), 1)
-    if new_width < _MIN_DIMENSION:
-        new_width = _MIN_DIMENSION
-        new_height = max(int(round(new_width / aspect_ratio)), 1)
-    if new_height < _MIN_DIMENSION:
-        new_height = _MIN_DIMENSION
-        new_width = max(int(round(new_height * aspect_ratio)), 1)
-    return new_width, new_height
-
-
-def _scale_dimensions_to_max_dimension(width, height, max_dim):
-    if max_dim == max(width, height):
-        return width, height
-    aspect_ratio = float(width) / float(height)
-    if width > height:
-        return max_dim, max(int(round(max_dim / aspect_ratio)), 1)
-    return max(int(round(max_dim * aspect_ratio)), 1), max_dim
+    shared.opts.add_option(
+        key='arh_predefined_percentages_display_key',
+        info=shared.OptionInfo(
+            default=_DEFAULT_DISPLAY_KEY,
+            label='Predefined percentage display format',
+            component=gr.Dropdown,
+            component_args=lambda: {
+                'choices': tuple(_PREDEFINED_PERCENTAGES_DISPLAY_MAP.keys()),
+            },
+            section=section,
+        ),
+    )
 
 
 class AspectRatioStepScript(scripts.Script):
@@ -113,9 +109,9 @@ class AspectRatioStepScript(scripts.Script):
             if opts.arh_show_max_width_or_height:
                 with gr.Row():
                     max_dimension = gr.inputs.Slider(
-                        minimum=64,
-                        maximum=2048,
-                        step=16,
+                        minimum=_MIN_DIMENSION,
+                        maximum=_MAX_DIMENSION,
+                        step=1,
                         default=opts.arh_max_width_or_height,
                         label='Maximum width or height (whichever is higher)',
                     )
@@ -126,13 +122,16 @@ class AspectRatioStepScript(scripts.Script):
                     )
 
             if opts.arh_show_predefined_percentages:
+                display_func = _PREDEFINED_PERCENTAGES_DISPLAY_MAP.get(
+                    opts.arh_predefined_percentages_display_key,
+                )
                 with gr.Column(variant='panel'), gr.Row(variant='compact'):
                     pps = opts.arh_predefined_percentages
                     percentages = [
-                        int(x) for x in pps.split(',')
+                        abs(int(x)) for x in pps.split(',')
                     ]
                     for percentage in percentages:
-                        gr.Button(value=f'{str(percentage)}%').click(
+                        gr.Button(value=display_func(percentage)).click(
                             fn=partial(
                                 _scale_by_percentage, pct=percentage / 100,
                             ),

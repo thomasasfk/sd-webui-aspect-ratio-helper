@@ -27,3 +27,10 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
   - i.e `25, 50, 75, 125, 150, 175, 200` `50, 125, 300` etc.
 
 ![settings.png](docs%2Fsettings.png)
+
+## Contributing:
+
+- Open to suggestions
+- Pull requests are appreciated
+- Write tests if possible and useful
+- Run pre-commit!
