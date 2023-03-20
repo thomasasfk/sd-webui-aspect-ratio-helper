@@ -7,8 +7,9 @@ from modules import scripts
 from modules import shared
 from modules.shared import opts
 
-_MIN_DIMENSION = 64
-_MAX_DIMENSION = 2048
+from util import _scale_dimensions_to_max_dimension
+from util import _scale_by_percentage
+
 _EXTENSION_NAME = 'Aspect Ratio Helper'
 
 
@@ -54,35 +55,6 @@ def on_ui_settings():
             section=section,
         ),
     )
-
-
-def _scale_by_percentage(width, height, pct):
-    aspect_ratio = float(width) / float(height)
-    step = (pct - 1.0)
-    new_width = max(int(round(width * (1.0 + step))), 1)
-    new_height = max(int(round(new_width / aspect_ratio)), 1)
-    if new_width > _MAX_DIMENSION:
-        new_width = _MAX_DIMENSION
-        new_height = max(int(round(new_width / aspect_ratio)), 1)
-    if new_height > _MAX_DIMENSION:
-        new_height = _MAX_DIMENSION
-        new_width = max(int(round(new_height * aspect_ratio)), 1)
-    if new_width < _MIN_DIMENSION:
-        new_width = _MIN_DIMENSION
-        new_height = max(int(round(new_width / aspect_ratio)), 1)
-    if new_height < _MIN_DIMENSION:
-        new_height = _MIN_DIMENSION
-        new_width = max(int(round(new_height * aspect_ratio)), 1)
-    return new_width, new_height
-
-
-def _scale_dimensions_to_max_dimension(width, height, max_dim):
-    if max_dim == max(width, height):
-        return width, height
-    aspect_ratio = float(width) / float(height)
-    if width > height:
-        return max_dim, max(int(round(max_dim / aspect_ratio)), 1)
-    return max(int(round(max_dim * aspect_ratio)), 1), max_dim
 
 
 class AspectRatioStepScript(scripts.Script):
