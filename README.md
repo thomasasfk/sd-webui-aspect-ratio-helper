@@ -35,3 +35,11 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
 - Pull requests are appreciated
 - Write tests if possible and useful
 - Run pre-commit
+
+## Testing:
+
+- From the root of the repository run:
+```
+pip install pytest
+pytest
+```
