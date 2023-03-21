@@ -1,96 +1,63 @@
-from functools import partial
-
 import gradio as gr
 from modules import script_callbacks
 from modules import scripts
 
-from aspect_ratio_helper._constants import _ARH_EXPAND_BY_DEFAULT_KEY
-from aspect_ratio_helper._constants import _ARH_MAX_WIDTH_OR_HEIGHT_KEY
-from aspect_ratio_helper._constants import \
-    _ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY
-from aspect_ratio_helper._constants import _ARH_PREDEFINED_PERCENTAGES_KEY
-from aspect_ratio_helper._constants import _ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY
-from aspect_ratio_helper._constants import _ARH_SHOW_PREDEFINED_PERCENTAGES_KEY
-from aspect_ratio_helper._constants import _EXTENSION_NAME
-from aspect_ratio_helper._constants import _MAX_DIMENSION
-from aspect_ratio_helper._constants import _MIN_DIMENSION
-from aspect_ratio_helper._settings import _PREDEFINED_PERCENTAGES_DISPLAY_MAP
-from aspect_ratio_helper._settings import _safe_opt
-from aspect_ratio_helper._settings import on_ui_settings
-from aspect_ratio_helper._util import _scale_by_percentage
-from aspect_ratio_helper._util import _scale_dimensions_to_max_dimension
+import aspect_ratio_helper._constants as _constants
+import aspect_ratio_helper._settings as _settings
 
 
 class AspectRatioStepScript(scripts.Script):
 
-    def title(self):
-        return _EXTENSION_NAME
+    def __init__(self):
+        self.t2i_w = None
+        self.t2i_h = None
+        self.i2i_w = None
+        self.i2i_h = None
+        self.wc = None
+        self.hc = None
 
-    def show(self, is_img2img):
+    def title(self) -> str:
+        return _constants.EXTENSION_NAME
+
+    def show(self, _) -> scripts.AlwaysVisible:
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img):
-        if not any([
-            _safe_opt(_ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY),
-            _safe_opt(_ARH_SHOW_PREDEFINED_PERCENTAGES_KEY),
-        ]):
-            return  # return early as no 'show' options enabled
-        with (
-            gr.Group(),
-            gr.Accordion(
-                _EXTENSION_NAME,
-                open=_safe_opt(_ARH_EXPAND_BY_DEFAULT_KEY),
-            ),
+        if is_img2img:
+            self.wc, self.hc = self.i2i_w, self.i2i_h
+        else:
+            self.wc, self.hc = self.t2i_h, self.t2i_w
+
+        elements = _settings.sort_elements_by_keys(
+            [element(self) for element in _settings.ELEMENTS],
+        )
+
+        if not any(element.should_show() for element in elements):
+            return  # no elements should render, so just return.
+
+        start_expanded: bool = _settings.safe_opt(
+            _constants.ARH_EXPAND_BY_DEFAULT_KEY,
+        )
+        with gr.Group(), gr.Accordion(
+                _constants.EXTENSION_NAME,
+                open=start_expanded,
         ):
-            if is_img2img:
-                inputs = outputs = [self.i2i_w, self.i2i_h]
-            else:
-                inputs = outputs = [self.t2i_w, self.t2i_h]
+            for element in elements:
+                if element.should_show():
+                    element.render()
 
-            if _safe_opt(_ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY):
-                with gr.Row():
-                    max_dimension = gr.inputs.Slider(
-                        minimum=_MIN_DIMENSION,
-                        maximum=_MAX_DIMENSION,
-                        step=1,
-                        default=_safe_opt(_ARH_MAX_WIDTH_OR_HEIGHT_KEY),
-                        label='Maximum width or height (whichever is higher)',
-                    )
-                    gr.Button(value='Scale to maximum width or height').click(
-                        fn=_scale_dimensions_to_max_dimension,
-                        inputs=[*inputs, max_dimension],
-                        outputs=outputs,
-                    )
-
-            if _safe_opt(_ARH_SHOW_PREDEFINED_PERCENTAGES_KEY):
-                display_func = _PREDEFINED_PERCENTAGES_DISPLAY_MAP.get(
-                    _safe_opt(_ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY),
-                )
-                with gr.Column(variant='panel'), gr.Row(variant='compact'):
-                    pps = _safe_opt(_ARH_PREDEFINED_PERCENTAGES_KEY)
-                    percentages = [
-                        abs(int(x)) for x in pps.split(',')
-                    ]
-                    for percentage in percentages:
-                        gr.Button(value=display_func(percentage)).click(
-                            fn=partial(
-                                _scale_by_percentage, pct=percentage / 100,
-                            ),
-                            inputs=inputs,
-                            outputs=outputs,
-                        )
-
-    def after_component(self, component, **kwargs):
+    def after_component(self, component: gr.components.Component, **kwargs):
         element_id = kwargs.get('elem_id')
 
-        if element_id == 'txt2img_width':
-            self.t2i_w = component
-        elif element_id == 'txt2img_height':
-            self.t2i_h = component
-        elif element_id == 'img2img_width':
-            self.i2i_w = component
-        elif element_id == 'img2img_height':
-            self.i2i_h = component
+        if isinstance(component, gr.components.Slider):
+            if element_id == 'txt2img_width':
+                self.t2i_w: gr.components.Slider = component
+            elif element_id == 'txt2img_height':
+                self.t2i_h: gr.components.Slider = component
+            elif element_id == 'img2img_width':
+                self.i2i_w: gr.components.Slider = component
+            elif element_id == 'img2img_height':
+                self.i2i_h: gr.components.Slider = component
 
 
-script_callbacks.on_ui_settings(on_ui_settings)
+script_callbacks.on_ui_settings(_settings.on_ui_settings)
