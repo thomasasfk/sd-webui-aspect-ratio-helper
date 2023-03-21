@@ -172,6 +172,11 @@ def test_safe_opt_util():
     assert _safe_opt_util(shared_opts, 'key') == 'value'
 
 
+def test_safe_opt_util_none():
+    shared_opts = SharedOpts(options={'key': None}, defaults={'key': 'value'})
+    assert _safe_opt_util(shared_opts, 'key') == 'value'
+
+
 def test_safe_opt_util_default_a(monkeypatch):
     monkeypatch.setattr(
         'aspect_ratio_helper._util._OPT_KEY_TO_DEFAULT_MAP',

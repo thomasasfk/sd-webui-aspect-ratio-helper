@@ -8,7 +8,9 @@ from aspect_ratio_helper._constants import \
 from aspect_ratio_helper._constants import _ARH_PREDEFINED_PERCENTAGES_KEY
 from aspect_ratio_helper._constants import _ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY
 from aspect_ratio_helper._constants import _ARH_SHOW_PREDEFINED_PERCENTAGES_KEY
+from aspect_ratio_helper._constants import _ARH_UI_COMPONENT_ORDER_KEY
 from aspect_ratio_helper._constants import _DEFAULT_PERCENTAGES_DISPLAY_KEY
+from aspect_ratio_helper._constants import _DEFAULT_UI_COMPONENT_ORDER_KEY
 from aspect_ratio_helper._constants import _EXTENSION_NAME
 from aspect_ratio_helper._constants import _MAX_DIMENSION
 from aspect_ratio_helper._constants import _MIN_DIMENSION
@@ -34,15 +36,42 @@ def on_ui_settings():
     shared.opts.add_option(
         key=_ARH_EXPAND_BY_DEFAULT_KEY,
         info=shared.OptionInfo(
-            default=_OPT_KEY_TO_DEFAULT_MAP[_ARH_EXPAND_BY_DEFAULT_KEY],
+            default=_OPT_KEY_TO_DEFAULT_MAP.get(
+                _ARH_EXPAND_BY_DEFAULT_KEY,
+            ),
             label='Expand by default',
+            section=section,
+        ),
+    )
+    shared.opts.add_option(
+        key=_ARH_UI_COMPONENT_ORDER_KEY,
+        info=shared.OptionInfo(
+            default=_OPT_KEY_TO_DEFAULT_MAP.get(
+                _ARH_UI_COMPONENT_ORDER_KEY,
+            ),
+            label='UI Component order',
+            #  todo: temporary drop-down to avoid user error!
+            #   we only have two components so 2 possible orders.
+            #   however, this will exponentially grow with more components.
+            #   if that happens, permutations is impractical, revisit then.
+            component=gr.Dropdown,
+            component_args=lambda: {
+                'choices': (
+                    _DEFAULT_UI_COMPONENT_ORDER_KEY,
+                    ', '.join(
+                        _DEFAULT_UI_COMPONENT_ORDER_KEY.split(',')[::-1],
+                    ),
+                ),
+            },
             section=section,
         ),
     )
     shared.opts.add_option(
         key=_ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY,
         info=shared.OptionInfo(
-            default=_OPT_KEY_TO_DEFAULT_MAP[_ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY],
+            default=_OPT_KEY_TO_DEFAULT_MAP.get(
+                _ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY,
+            ),
             label='Show maximum width or height button',
             section=section,
         ),
@@ -50,7 +79,9 @@ def on_ui_settings():
     shared.opts.add_option(
         key=_ARH_MAX_WIDTH_OR_HEIGHT_KEY,
         info=shared.OptionInfo(
-            default=_OPT_KEY_TO_DEFAULT_MAP[_ARH_MAX_WIDTH_OR_HEIGHT_KEY],
+            default=_OPT_KEY_TO_DEFAULT_MAP.get(
+                _ARH_MAX_WIDTH_OR_HEIGHT_KEY,
+            ),
             label='Maximum width or height default',
             component=gr.Slider,
             component_args={
@@ -64,9 +95,9 @@ def on_ui_settings():
     shared.opts.add_option(
         key=_ARH_SHOW_PREDEFINED_PERCENTAGES_KEY,
         info=shared.OptionInfo(
-            default=_OPT_KEY_TO_DEFAULT_MAP[
-                _ARH_SHOW_PREDEFINED_PERCENTAGES_KEY
-            ],
+            default=_OPT_KEY_TO_DEFAULT_MAP.get(
+                _ARH_SHOW_PREDEFINED_PERCENTAGES_KEY,
+            ),
             label='Show predefined percentage buttons',
             section=section,
         ),
@@ -74,7 +105,9 @@ def on_ui_settings():
     shared.opts.add_option(
         key=_ARH_PREDEFINED_PERCENTAGES_KEY,
         info=shared.OptionInfo(
-            default=_OPT_KEY_TO_DEFAULT_MAP[_ARH_PREDEFINED_PERCENTAGES_KEY],
+            default=_OPT_KEY_TO_DEFAULT_MAP.get(
+                _ARH_PREDEFINED_PERCENTAGES_KEY,
+            ),
             label='Predefined percentage buttons, applied to dimensions (75, '
                   '125, 150)',
             section=section,
@@ -83,9 +116,9 @@ def on_ui_settings():
     shared.opts.add_option(
         key=_ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY,
         info=shared.OptionInfo(
-            default=_OPT_KEY_TO_DEFAULT_MAP[
-                _ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY
-            ],
+            default=_OPT_KEY_TO_DEFAULT_MAP.get(
+                _ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY,
+            ),
             label='Predefined percentage display format',
             component=gr.Dropdown,
             component_args=lambda: {

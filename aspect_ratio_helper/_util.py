@@ -8,7 +8,9 @@ from aspect_ratio_helper._constants import _OPT_KEY_TO_DEFAULT_MAP
 def _safe_opt_util(shared_opts, key):
     # attempt to retrieve key from shared options
     with contextlib.suppress(AttributeError):
-        return shared_opts.__getattr__(key)
+        value = shared_opts.__getattr__(key)
+        if value is not None:
+            return value
 
     # attempt to retrieve default, and last resort the constant default
     return shared_opts.get_default(key) or _OPT_KEY_TO_DEFAULT_MAP.get(key)
