@@ -142,10 +142,10 @@ def test_scale_by_percentage(
         ),
     ],
 )
-def test_scale_dimensions_to(
+def test_scale_dimensions_to_max_dim(
         width, height, max_dim, expected,
 ):
-    assert _util.scale_dimensions_to(
+    assert _util.scale_dimensions_to_max_dim(
         width, height, max_dim,
     ) == expected
 
