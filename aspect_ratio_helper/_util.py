@@ -37,10 +37,28 @@ def scale_by_percentage(width, height, pct) -> tuple[int, int]:
     return clamp_to_boundaries(new_width, new_height, aspect_ratio)
 
 
-def scale_dimensions_to(
+def scale_dimensions_to_ui_width_or_height(
+        width, height, arw, arh,
+) -> tuple[int, int]:
+    return scale_dimensions_to_max_dim(arw, arh, max(width, height))
+
+
+def scale_dimensions_to_max_dim_func(
+        width, height, max_dim: callable,
+) -> tuple[int, int]:
+    return scale_dimensions_to_max_dim(width, height, max_dim())
+
+
+def scale_dimensions_to_max_dim(
         width, height, max_dim,
 ) -> tuple[int, int]:
     aspect_ratio = float(width) / float(height)
+    return scale_dimensions_to_ar(width, height, max_dim, aspect_ratio)
+
+
+def scale_dimensions_to_ar(
+        width, height, max_dim, aspect_ratio,
+) -> tuple[int, int]:
     if width > height:
         new_width = max_dim
         new_height = int(round(max_dim / aspect_ratio))
@@ -63,4 +81,16 @@ def clamp_to_boundaries(width, height, aspect_ratio) -> tuple[int, int]:
     if height < _const.MIN_DIMENSION:
         height = _const.MIN_DIMENSION
         width = int(round(height * aspect_ratio))
+
+    # for insane aspect ratios we don't support... i.e 1:100
+    # 64:6400 when run through this function, so we clamp to 64:2048 (‾◡◝)
+    if width < _const.MIN_DIMENSION:
+        width = _const.MIN_DIMENSION
+    elif width > _const.MAX_DIMENSION:
+        width = _const.MAX_DIMENSION
+    if height < _const.MIN_DIMENSION:
+        height = _const.MIN_DIMENSION
+    elif height > _const.MAX_DIMENSION:
+        height = _const.MAX_DIMENSION
+
     return width, height

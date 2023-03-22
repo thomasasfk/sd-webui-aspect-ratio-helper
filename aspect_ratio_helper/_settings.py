@@ -1,3 +1,5 @@
+import itertools
+
 import gradio as gr
 from modules import shared
 
@@ -14,10 +16,12 @@ PREDEFINED_PERCENTAGES_DISPLAY_MAP = {
 ELEMENTS = (
     _components.MaxDimensionScaler,
     _components.PredefinedPercentageButtons,
+    _components.PredefinedAspectRatioButtons,
 )
 
+DEFAULT_UI_COMPONENT_ORDER_KEY_LIST = [e.__name__ for e in ELEMENTS]
 DEFAULT_UI_COMPONENT_ORDER_KEY = ', '.join(
-    [e.__name__ for e in ELEMENTS],  # noqa
+    DEFAULT_UI_COMPONENT_ORDER_KEY_LIST,
 )
 OPT_KEY_TO_DEFAULT_MAP = {
     _constants.ARH_EXPAND_BY_DEFAULT_KEY: False,
@@ -31,6 +35,10 @@ OPT_KEY_TO_DEFAULT_MAP = {
         '25, 50, 75, 125, 150, 175, 200',
     _constants.ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY:
         _constants.DEFAULT_PERCENTAGES_DISPLAY_KEY,
+    _constants.ARH_SHOW_PREDEFINED_ASPECT_RATIOS_KEY: False,
+    _constants.ARH_PREDEFINED_ASPECT_RATIO_USE_MAX_DIM_KEY: False,
+    _constants.ARH_PREDEFINED_ASPECT_RATIOS_KEY:
+        '1:1, 4:3, 16:9, 9:16, 21:9',
 }
 
 
@@ -44,6 +52,14 @@ def sort_elements_by_keys(
     ordered_component_keys = safe_opt(
         _constants.ARH_UI_COMPONENT_ORDER_KEY,
     ).split(',')
+
+    # this can happen if we add new components, but the user has old settings.
+    # if this happens, we find the missing components, and append them.
+    if len(ordered_component_keys) != len(ELEMENTS):
+        all_components = set(DEFAULT_UI_COMPONENT_ORDER_KEY_LIST)
+        missing_components = all_components - set(ordered_component_keys)
+        ordered_component_keys.extend(missing_components)
+
     try:
         component_key_to_order_dict = {
             key: order for order, key in enumerate(
@@ -85,18 +101,15 @@ def on_ui_settings():
                 _constants.ARH_UI_COMPONENT_ORDER_KEY,
             ),
             label='UI Component order',
-            #  todo: temporary drop-down to avoid user error!
-            #   we only have two components so 2 possible orders.
-            #   however, this will exponentially grow with more components.
-            #   if that happens, permutations is impractical, revisit then.
             component=gr.Dropdown,
             component_args=lambda: {
-                'choices': (
-                    DEFAULT_UI_COMPONENT_ORDER_KEY,
-                    ', '.join(
-                        DEFAULT_UI_COMPONENT_ORDER_KEY.split(',')[::-1],
-                    ),
-                ),
+                'choices': [
+                    ', '.join(p) for p in itertools.permutations(
+                        DEFAULT_UI_COMPONENT_ORDER_KEY_LIST,
+                    )  # todo: only add permutations of SHOWN components,
+                       #   if the user isn't using the component... why have it
+                       #   in the sort list?
+                ],
             },
             section=section,
         ),
@@ -133,7 +146,7 @@ def on_ui_settings():
             default=OPT_KEY_TO_DEFAULT_MAP.get(
                 _constants.ARH_SHOW_PREDEFINED_PERCENTAGES_KEY,
             ),
-            label='Show predefined percentage buttons',
+            label='Show pre-defined percentage buttons',
             section=section,
         ),
     )
@@ -143,7 +156,7 @@ def on_ui_settings():
             default=OPT_KEY_TO_DEFAULT_MAP.get(
                 _constants.ARH_PREDEFINED_PERCENTAGES_KEY,
             ),
-            label='Predefined percentage buttons, applied to dimensions (75, '
+            label='Pre-defined percentage buttons, applied to dimensions (75, '
                   '125, 150)',
             section=section,
         ),
@@ -154,11 +167,43 @@ def on_ui_settings():
             default=OPT_KEY_TO_DEFAULT_MAP.get(
                 _constants.ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY,
             ),
-            label='Predefined percentage display format',
+            label='Pre-defined percentage display format',
             component=gr.Dropdown,
             component_args=lambda: {
                 'choices': tuple(PREDEFINED_PERCENTAGES_DISPLAY_MAP.keys()),
             },
+            section=section,
+        ),
+    )
+    shared.opts.add_option(
+        key=_constants.ARH_SHOW_PREDEFINED_ASPECT_RATIOS_KEY,
+        info=shared.OptionInfo(
+            default=OPT_KEY_TO_DEFAULT_MAP.get(
+                _constants.ARH_SHOW_PREDEFINED_ASPECT_RATIOS_KEY,
+            ),
+            label='Show pre-defined aspect ratio buttons',
+            section=section,
+        ),
+    )
+    shared.opts.add_option(
+        key=_constants.ARH_PREDEFINED_ASPECT_RATIO_USE_MAX_DIM_KEY,
+        info=shared.OptionInfo(
+            default=OPT_KEY_TO_DEFAULT_MAP.get(
+                _constants.ARH_PREDEFINED_ASPECT_RATIO_USE_MAX_DIM_KEY,
+            ),
+            label='Use "Maximum width or height default" option for aspect '
+                  'ratio buttons (by default we use the max width or height)',
+            section=section,
+        ),
+    )
+    shared.opts.add_option(
+        key=_constants.ARH_PREDEFINED_ASPECT_RATIOS_KEY,
+        info=shared.OptionInfo(
+            default=OPT_KEY_TO_DEFAULT_MAP.get(
+                _constants.ARH_PREDEFINED_ASPECT_RATIOS_KEY,
+            ),
+            label='Pre-defined aspect ratio buttons '
+                  '(1:1, 4:3, 16:9, 9:16, 21:9)',
             section=section,
         ),
     )

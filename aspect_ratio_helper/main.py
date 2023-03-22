@@ -9,12 +9,13 @@ import aspect_ratio_helper._settings as _settings
 class AspectRatioStepScript(scripts.Script):
 
     def __init__(self):
-        self.t2i_w = None
-        self.t2i_h = None
-        self.i2i_w = None
-        self.i2i_h = None
-        self.wc = None
-        self.hc = None
+        self.t2i_w: gr.components.Slider | None = None
+        self.t2i_h: gr.components.Slider | None = None
+        self.i2i_w: gr.components.Slider | None = None
+        self.i2i_h: gr.components.Slider | None = None
+        self.wc: gr.components.Slider
+        self.hc: gr.components.Slider
+        self.max_dimension: float
 
     def title(self) -> str:
         return _constants.EXTENSION_NAME
@@ -26,7 +27,7 @@ class AspectRatioStepScript(scripts.Script):
         if is_img2img:
             self.wc, self.hc = self.i2i_w, self.i2i_h
         else:
-            self.wc, self.hc = self.t2i_h, self.t2i_w
+            self.wc, self.hc = self.t2i_w, self.t2i_h  # noqa
 
         elements = _settings.sort_elements_by_keys(
             [element(self) for element in _settings.ELEMENTS],
@@ -43,8 +44,10 @@ class AspectRatioStepScript(scripts.Script):
                 open=start_expanded,
         ):
             for element in elements:
-                if element.should_show():
-                    element.render()
+                # we deliberately DON'T check element.should_show() here.
+                # we need to call render to instantiate the components, we use
+                # the visible property on each component to hide them.
+                element.render()
 
     def after_component(self, component: gr.components.Component, **kwargs):
         element_id = kwargs.get('elem_id')
