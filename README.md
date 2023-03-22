@@ -21,7 +21,7 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
     - i.e `75% of 512x256 = 384x192` `150% of 512x512 = 768x768`
     - i.e `x0.75 of 512x256 = 384x192` `x1.5 of 512x512 = 768x768`
 
-![user-interface.png](docs%2Fuser-interface.png)
+![user-interface.png](docs%2Fui.png)
 
 ## Settings
 
@@ -43,7 +43,7 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
   - `Raw percentage (50%, 150%)`
   - `Multiplication (x0.5, x1.5)`
 
-![settings.png](docs%2Fsettings.png)
+![settings.png](docs%2Foptions.png)
 
 ## Contributing
 
