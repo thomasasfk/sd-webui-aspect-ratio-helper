@@ -17,3 +17,4 @@ ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY \
     = 'arh_predefined_percentages_display_key'
 DEFAULT_PERCENTAGES_DISPLAY_KEY \
     = 'Incremental/decremental percentage (-50%, +50%)'
+SECTION = 'aspect_ratio_helper', EXTENSION_NAME

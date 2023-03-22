@@ -21,8 +21,13 @@ class ArhUIComponent(ABC):
     @abstractmethod
     def should_show() -> bool: ...
 
+    @staticmethod
+    @abstractmethod
+    def add_options(): ...
+
 
 class MaxDimensionScaler(ArhUIComponent):
+
     def render(self):
         max_dim_default = _settings.safe_opt(
             _constants.ARH_MAX_WIDTH_OR_HEIGHT_KEY,
@@ -45,11 +50,12 @@ class MaxDimensionScaler(ArhUIComponent):
                 maximum=_constants.MAX_DIMENSION,
                 step=1,
                 default=max_dim_default,
-                label='Maximum width or height (whichever is higher)',
+                label='Maximum dimension',
             )
 
             def _update_max_dimension(_max_dimension):
                 self.script.max_dimension = _max_dimension
+
             max_dimension_slider.change(
                 _update_max_dimension,
                 inputs=[max_dimension_slider],
@@ -57,7 +63,7 @@ class MaxDimensionScaler(ArhUIComponent):
             )
 
             gr.Button(
-                value='Scale to maximum width or height',
+                value='Scale to maximum dimension',
                 visible=self.should_show(),
             ).click(
                 fn=_util.scale_dimensions_to_max_dim,
@@ -68,6 +74,124 @@ class MaxDimensionScaler(ArhUIComponent):
     @staticmethod
     def should_show() -> bool:
         return _settings.safe_opt(_constants.ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY)
+
+    @staticmethod
+    def add_options(shared):
+        shared.opts.add_option(
+            key=_constants.ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY,
+                ),
+                label='Show maximum dimension button',
+                section=_constants.SECTION,
+            ),
+        )
+        shared.opts.add_option(
+            key=_constants.ARH_MAX_WIDTH_OR_HEIGHT_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_MAX_WIDTH_OR_HEIGHT_KEY,
+                ),
+                label='Maximum dimension default',
+                component=gr.Slider,
+                component_args={
+                    'minimum': _constants.MIN_DIMENSION,
+                    'maximum': _constants.MAX_DIMENSION,
+                    'step': 1,
+                },
+                section=_constants.SECTION,
+            ),
+        )
+
+
+class PredefinedAspectRatioButtons(ArhUIComponent):
+
+    def render(self):
+        use_max_dim_op = _settings.safe_opt(
+            _constants.ARH_PREDEFINED_ASPECT_RATIO_USE_MAX_DIM_KEY,
+        )
+        aspect_ratios = _settings.safe_opt(
+            _constants.ARH_PREDEFINED_ASPECT_RATIOS_KEY,
+        ).split(',')
+
+        with gr.Column(
+            variant='panel',
+            visible=self.should_show(),
+        ), gr.Row(
+            variant='compact',
+            visible=self.should_show(),
+        ):
+            for ar_str in aspect_ratios:
+                w, h, *_ = [abs(float(d)) for d in ar_str.split(':')]
+
+                inputs = []
+                if use_max_dim_op:
+                    ar_func = partial(
+                        _util.scale_dimensions_to_max_dim_func,
+                        width=w, height=h,
+                        max_dim=lambda: self.script.max_dimension,
+                    )
+                else:
+                    inputs.extend([self.script.wc, self.script.hc])
+                    ar_func = partial(
+                        _util.scale_dimensions_to_ui_width_or_height,
+                        arw=w, arh=h,
+                    )
+
+                gr.Button(
+                    value=self.display_func(ar_str) or ar_str,
+                    visible=self.should_show(),
+                ).click(
+                    fn=ar_func,
+                    inputs=inputs,
+                    outputs=[self.script.wc, self.script.hc],
+                )
+
+    @staticmethod
+    def should_show() -> bool:
+        return _settings.safe_opt(
+            _constants.ARH_SHOW_PREDEFINED_ASPECT_RATIOS_KEY,
+        )
+
+    @staticmethod
+    def add_options(shared):
+        shared.opts.add_option(
+            key=_constants.ARH_SHOW_PREDEFINED_ASPECT_RATIOS_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_SHOW_PREDEFINED_ASPECT_RATIOS_KEY,
+                ),
+                label='Show pre-defined aspect ratio buttons',
+                section=_constants.SECTION,
+            ),
+        )
+        shared.opts.add_option(
+            key=_constants.ARH_PREDEFINED_ASPECT_RATIO_USE_MAX_DIM_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_PREDEFINED_ASPECT_RATIO_USE_MAX_DIM_KEY,
+                ),
+                label='Use "Maximum dimension" for aspect ratio buttons (by '
+                      'default we use the max width or height)',
+                section=_constants.SECTION,
+            ),
+        )
+        shared.opts.add_option(
+            key=_constants.ARH_PREDEFINED_ASPECT_RATIOS_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_PREDEFINED_ASPECT_RATIOS_KEY,
+                ),
+                label='Pre-defined aspect ratio buttons '
+                      '(1:1, 4:3, 16:9, 9:16, 21:9)',
+                section=_constants.SECTION,
+            ),
+        )
+
+    @property
+    def display_func(self) -> callable:
+        return lambda _: None  # todo: different displays for aspect ratios.
 
 
 class PredefinedPercentageButtons(ArhUIComponent):
@@ -104,6 +228,45 @@ class PredefinedPercentageButtons(ArhUIComponent):
             _constants.ARH_SHOW_PREDEFINED_PERCENTAGES_KEY,
         )
 
+    @staticmethod
+    def add_options(shared):
+        shared.opts.add_option(
+            key=_constants.ARH_SHOW_PREDEFINED_PERCENTAGES_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_SHOW_PREDEFINED_PERCENTAGES_KEY,
+                ),
+                label='Show pre-defined percentage buttons',
+                section=_constants.SECTION,
+            ),
+        )
+        shared.opts.add_option(
+            key=_constants.ARH_PREDEFINED_PERCENTAGES_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_PREDEFINED_PERCENTAGES_KEY,
+                ),
+                label='Pre-defined percentage buttons (75, 125, 150)',
+                section=_constants.SECTION,
+            ),
+        )
+        shared.opts.add_option(
+            key=_constants.ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY,
+                ),
+                label='Pre-defined percentage display format',
+                component=gr.Dropdown,
+                component_args=lambda: {
+                    'choices': tuple(
+                        _settings.PREDEFINED_PERCENTAGES_DISPLAY_MAP.keys(),
+                    ),
+                },
+                section=_constants.SECTION,
+            ),
+        )
+
     @property
     def display_func(self) -> callable:
         return _settings.PREDEFINED_PERCENTAGES_DISPLAY_MAP.get(
@@ -111,60 +274,3 @@ class PredefinedPercentageButtons(ArhUIComponent):
                 _constants.ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY,
             ),
         )
-
-
-class PredefinedAspectRatioButtons(ArhUIComponent):
-
-    def render(self):
-        use_max_dim_op = _settings.safe_opt(
-            _constants.ARH_PREDEFINED_ASPECT_RATIO_USE_MAX_DIM_KEY,
-        )
-
-        with gr.Column(
-                variant='panel',
-                visible=self.should_show(),
-        ), gr.Row(
-            variant='compact',
-            visible=self.should_show(),
-        ):
-            aspect_ratios = _settings.safe_opt(
-                _constants.ARH_PREDEFINED_ASPECT_RATIOS_KEY,
-            ).split(',')
-
-            for ar_str in aspect_ratios:
-                w, h, *_ = [abs(float(d)) for d in ar_str.split(':')]
-
-                if use_max_dim_op:
-                    ar_func = partial(
-                        _util.scale_dimensions_to_max_dim_func,
-                        width=w, height=h,
-                        max_dim=lambda: self.script.max_dimension,
-                    )
-                    inputs = []
-                else:
-                    ar_func = partial(
-                        _util.scale_dimensions_to_ui_width_or_height,
-                        arw=w, arh=h,
-                    )
-                    inputs = [self.script.wc, self.script.hc]
-
-                display = self.display_func(ar_str) or ar_str
-                btn = gr.Button(
-                    value=display,
-                    visible=self.should_show(),
-                )
-                btn.click(
-                    fn=ar_func,
-                    inputs=inputs,
-                    outputs=[self.script.wc, self.script.hc],
-                )
-
-    @staticmethod
-    def should_show() -> bool:
-        return _settings.safe_opt(
-            _constants.ARH_SHOW_PREDEFINED_ASPECT_RATIOS_KEY,
-        )
-
-    @property
-    def display_func(self) -> callable:
-        return lambda _: None  # todo, different displays for aspect ratios.

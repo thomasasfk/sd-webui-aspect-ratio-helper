@@ -29,12 +29,12 @@ class AspectRatioStepScript(scripts.Script):
         else:
             self.wc, self.hc = self.t2i_w, self.t2i_h  # noqa
 
-        elements = _settings.sort_elements_by_keys(
-            [element(self) for element in _settings.ELEMENTS],
+        components = _settings.sort_components_by_keys(
+            [component(self) for component in _settings.COMPONENTS],
         )
 
-        if not any(element.should_show() for element in elements):
-            return  # no elements should render, so just return.
+        if not any(component.should_show() for component in components):
+            return  # no components should render, so just return.
 
         start_expanded: bool = _settings.safe_opt(
             _constants.ARH_EXPAND_BY_DEFAULT_KEY,
@@ -43,11 +43,11 @@ class AspectRatioStepScript(scripts.Script):
                 _constants.EXTENSION_NAME,
                 open=start_expanded,
         ):
-            for element in elements:
-                # we deliberately DON'T check element.should_show() here.
+            for component in components:
+                # we deliberately DON'T check component.should_show() here.
                 # we need to call render to instantiate the components, we use
                 # the visible property on each component to hide them.
-                element.render()
+                component.render()
 
     def after_component(self, component: gr.components.Component, **kwargs):
         element_id = kwargs.get('elem_id')
