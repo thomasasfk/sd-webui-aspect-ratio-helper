@@ -84,6 +84,9 @@ def clamp_to_boundaries(width, height, aspect_ratio) -> tuple[int, int]:
 
     # for insane aspect ratios we don't support... i.e 1:100
     # 64:6400 when run through this function, so we clamp to 64:2048 (‾◡◝)
+    # also.  when the user does this it breaks the "scale to max" function
+    # on the ui until they change to another reasonable aspect ratio.
+    # todo: figure out why ^ and handle it better.
     if width < _const.MIN_DIMENSION:
         width = _const.MIN_DIMENSION
     elif width > _const.MAX_DIMENSION:
