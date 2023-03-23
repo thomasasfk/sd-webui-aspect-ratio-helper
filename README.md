@@ -54,6 +54,8 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
 
 Developed using existing [AUTOMATIC1111 webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) dependencies.
 
+It's recommended to use the python version specified by A111 webui.
+
 However - for running unit tests, we use pytest.
 
 ```bash

@@ -3,7 +3,7 @@ import contextlib
 import aspect_ratio_helper._constants as _const
 
 
-def safe_opt_util(shared_opts, key, default_key_map):
+def safe_opt_util(shared_opts, key, default_key_map: dict[str, object]):
     # attempt to retrieve key from shared options
     with contextlib.suppress(AttributeError):
         value = shared_opts.__getattr__(key)
