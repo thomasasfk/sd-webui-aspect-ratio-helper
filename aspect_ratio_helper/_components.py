@@ -1,6 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
 from functools import partial
+from typing import Callable
 
 import gradio as gr
 
@@ -190,7 +191,7 @@ class PredefinedAspectRatioButtons(ArhUIComponent):
         )
 
     @property
-    def display_func(self) -> callable:
+    def display_func(self) -> Callable[[str], str]:
         return lambda _: None  # todo: different displays for aspect ratios.
 
 
@@ -268,7 +269,7 @@ class PredefinedPercentageButtons(ArhUIComponent):
         )
 
     @property
-    def display_func(self) -> callable:
+    def display_func(self) -> Callable[[str], str]:
         return _settings.PREDEFINED_PERCENTAGES_DISPLAY_MAP.get(
             _settings.safe_opt(
                 _constants.ARH_PREDEFINED_PERCENTAGES_DISPLAY_KEY,
