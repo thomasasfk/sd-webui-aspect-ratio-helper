@@ -33,7 +33,11 @@ class AspectRatioStepScript(scripts.Script):
             [component(self) for component in _settings.COMPONENTS],
         )
 
-        if not any(component.should_show() for component in components):
+        hide_accordion: bool = _settings.safe_opt(
+            _constants.ARH_HIDE_ACCORDION_BY_DEFAULT_KEY,
+        )
+
+        if hide_accordion or not any(c.should_show() for c in components):
             return  # no components should render, so just return.
 
         start_expanded: bool = _settings.safe_opt(

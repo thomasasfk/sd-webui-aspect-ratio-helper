@@ -4,6 +4,7 @@ MAX_DIMENSION = 2048
 MIN_DIMENSION = 64
 
 ARH_EXPAND_BY_DEFAULT_KEY = 'arh_expand_by_default'
+ARH_HIDE_ACCORDION_BY_DEFAULT_KEY = 'arh_hide_accordion_by_default'
 ARH_UI_COMPONENT_ORDER_KEY = 'arh_ui_component_order_key'
 ARH_JAVASCRIPT_ASPECT_RATIO_SHOW_KEY = 'arh_javascript_aspect_ratio_show'
 ARH_JAVASCRIPT_ASPECT_RATIOS_KEY = 'arh_javascript_aspect_ratio'

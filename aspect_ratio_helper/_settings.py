@@ -25,6 +25,7 @@ DEFAULT_UI_COMPONENT_ORDER_KEY = ', '.join(
 )
 OPT_KEY_TO_DEFAULT_MAP = {
     _constants.ARH_EXPAND_BY_DEFAULT_KEY: False,
+    _constants.ARH_HIDE_ACCORDION_BY_DEFAULT_KEY: False,
     _constants.ARH_UI_COMPONENT_ORDER_KEY:
         DEFAULT_UI_COMPONENT_ORDER_KEY,
     _constants.ARH_JAVASCRIPT_ASPECT_RATIO_SHOW_KEY: False,
@@ -87,35 +88,7 @@ def sort_components_by_keys(
 
 
 def on_ui_settings():
-    # default ui options
-    shared.opts.add_option(
-        key=_constants.ARH_EXPAND_BY_DEFAULT_KEY,
-        info=shared.OptionInfo(
-            default=OPT_KEY_TO_DEFAULT_MAP.get(
-                _constants.ARH_EXPAND_BY_DEFAULT_KEY,
-            ),
-            label='Expand by default',
-            section=_constants.SECTION,
-        ),
-    )
-    shared.opts.add_option(
-        key=_constants.ARH_UI_COMPONENT_ORDER_KEY,
-        info=shared.OptionInfo(
-            default=OPT_KEY_TO_DEFAULT_MAP.get(
-                _constants.ARH_UI_COMPONENT_ORDER_KEY,
-            ),
-            label='UI Component order',
-            component=gr.Dropdown,
-            component_args=lambda: {
-                'choices': [
-                    ', '.join(p) for p in itertools.permutations(
-                        DEFAULT_UI_COMPONENT_ORDER_KEY_LIST,
-                    )
-                ],
-            },
-            section=_constants.SECTION,
-        ),
-    )
+    # javascript ui options
     shared.opts.add_option(
         key=_constants.ARH_JAVASCRIPT_ASPECT_RATIO_SHOW_KEY,
         info=shared.OptionInfo(
@@ -134,6 +107,46 @@ def on_ui_settings():
             ),
             label='JavaScript aspect ratio buttons'
                   ' (1:1, 4:3, 16:9, 9:16, 21:9)',
+            section=_constants.SECTION,
+        ),
+    )
+
+    # accordion options
+    shared.opts.add_option(
+        key=_constants.ARH_HIDE_ACCORDION_BY_DEFAULT_KEY,
+        info=shared.OptionInfo(
+            default=OPT_KEY_TO_DEFAULT_MAP.get(
+                _constants.ARH_HIDE_ACCORDION_BY_DEFAULT_KEY,
+            ),
+            label='Hide accordion by default',
+            section=_constants.SECTION,
+        ),
+    )
+    shared.opts.add_option(
+        key=_constants.ARH_EXPAND_BY_DEFAULT_KEY,
+        info=shared.OptionInfo(
+            default=OPT_KEY_TO_DEFAULT_MAP.get(
+                _constants.ARH_EXPAND_BY_DEFAULT_KEY,
+            ),
+            label='Expand accordion by default',
+            section=_constants.SECTION,
+        ),
+    )
+    shared.opts.add_option(
+        key=_constants.ARH_UI_COMPONENT_ORDER_KEY,
+        info=shared.OptionInfo(
+            default=OPT_KEY_TO_DEFAULT_MAP.get(
+                _constants.ARH_UI_COMPONENT_ORDER_KEY,
+            ),
+            label='UI Component order',
+            component=gr.Dropdown,
+            component_args=lambda: {
+                'choices': [
+                    ', '.join(p) for p in itertools.permutations(
+                        DEFAULT_UI_COMPONENT_ORDER_KEY_LIST,
+                    )
+                ],
+            },
             section=_constants.SECTION,
         ),
     )
