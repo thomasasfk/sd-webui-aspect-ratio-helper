@@ -38,7 +38,8 @@ https://user-images.githubusercontent.com/22506439/227396634-7a63671a-fd38-419a-
 
 ## Settings
 
-- Expand by default (`False`)
+- Hide accordion by default (`False`)
+- Expand accordion by default (`False`)
   - Determines whether the 'Aspect Ratio Helper' accordion expands by default
 - UI Component order (`MaxDimensionScaler, PredefinedAspectRatioButtons, PredefinedPercentageButtons`)
   - Determines the order in which the UI components will render
@@ -60,6 +61,9 @@ https://user-images.githubusercontent.com/22506439/227396634-7a63671a-fd38-419a-
   - `Multiplication (x0.5, x1.5)`
 
 ![settings.png](docs%2Fopts.png)
+
+
+JavaScript & accordion aspect ratios _might_ not play well together - I don't think many users will use both simultaneously, but we'll see.
 
 ## Contributing
 
