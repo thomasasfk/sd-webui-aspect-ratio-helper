@@ -56,7 +56,7 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
   - `Raw percentage (50%, 150%)`
   - `Multiplication (x0.5, x1.5)`
 
-![settings.png](docs%2Foptions.png)
+![settings.png](docs%2Fopts.png)
 
 ## Contributing
 
