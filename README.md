@@ -6,6 +6,16 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
 
 ## Features
 
+- JavaScript aspect ratio controls
+  - Adds a dropdown of configurable aspect ratios, to which the dimensions will auto-scale
+  - When selected, you will only be able to modify the higher dimension
+    - The smaller or equivalent dimension will scale accordingly
+  - If "Lock/🔒" is selected, the aspect ratio of the current dimensions will be kept
+  - If you click the "Swap/⇅" button, the current dimensions will swap
+    - Configurable aspect ratios will also flip, reducing the need for duplication of config
+
+<video src='https://cdn.discordapp.com/attachments/612983579491958787/1088625847969263636/chrome_wPYvl9oW1H.mp4'></video>
+
 - Scale to maximum dimension
   - Upon clicking, the width and height will scale according to the configured maximum value
   - Aspect ratio will be retained, the smaller or equivalent dimension will be scaled to match
@@ -29,6 +39,9 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
   - Determines whether the 'Aspect Ratio Helper' accordion expands by default
 - UI Component order (`MaxDimensionScaler, PredefinedAspectRatioButtons, PredefinedPercentageButtons`)
   - Determines the order in which the UI components will render
+- Enable JavaScript aspect ratio controls
+- JavaScript aspect ratio buttons `(Off, 🔓, 1:1, 4:3, 16:9, 9:16, 21:9)`
+  - i.e `Off, 🔓, 1:1, 4:3, 16:9, 9:16, 21:9`, `Off, 🔓, 9:2, 1:3`
 - Show maximum dimension button (`True`)
 - Maximum dimension default (`1024`)
 - Show pre-defined aspect ratio buttons (`True`)
