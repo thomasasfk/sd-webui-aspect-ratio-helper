@@ -14,7 +14,9 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
   - If you click the "Swap/⇅" button, the current dimensions will swap
     - Configurable aspect ratios will also flip, reducing the need for duplication of config
 
-<video src='https://cdn.discordapp.com/attachments/612983579491958787/1088625847969263636/chrome_wPYvl9oW1H.mp4'></video>
+https://user-images.githubusercontent.com/22506439/227396634-7a63671a-fd38-419a-b734-a3d26647cc1d.mp4
+
+</br>
 
 - Scale to maximum dimension
   - Upon clicking, the width and height will scale according to the configured maximum value
