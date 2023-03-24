@@ -49,18 +49,25 @@ class ContainerController {
 }
 
 function _reverseAspectRatio(ar) {
-    if (['Off', '🔓'].includes(ar)) return;
+    if (_NON_CONFIGURABLE.includes(ar)) return;
     const [width, height] = ar.split(":");
     return `${height}:${width}`;
 }
 
+
+const _OFF = "Off";
+const _LOCK = '🔓';
+const _IMAGE = '🖼️';
+
+const _NON_CONFIGURABLE = [_OFF, _LOCK, _IMAGE]
+
+const _MAXIMUM = 2048;
+const _MINIMUM = 64;
+
 class AspectRatioController {
-    constructor(widthContainer, heightContainer, aspectRatio = "Off") {
+    constructor(widthContainer, heightContainer, aspectRatio) {
         this.widthContainer = new ContainerController(widthContainer);
         this.heightContainer = new ContainerController(heightContainer);
-        this.max = 2048;
-        this.min = 64;
-
         this.dimensions = {
             widthInput: this.widthContainer.num,
             widthRange: this.widthContainer.range,
@@ -82,12 +89,21 @@ class AspectRatioController {
     setAspectRatio(aspectRatio) {
         this.aspectRatio = aspectRatio;
 
-        if (aspectRatio === "Off") {
+        if (aspectRatio === _OFF) {
             this.widthContainer.enable();
             this.heightContainer.enable();
-            this.widthContainer.updateMin(this.min);
-            this.heightContainer.updateMin(this.min);
+            this.widthContainer.updateMin(_MINIMUM);
+            this.heightContainer.updateMin(_MINIMUM);
             return;
+        }
+
+        if (aspectRatio === _IMAGE) {
+            const img = gradioApp().querySelector('#img2img_image').querySelector('img');
+            if (img) {
+                aspectRatio = `${img.naturalWidth}:${img.naturalHeight}`;
+            } else {
+                aspectRatio = `1:1`
+            }
         }
 
         const lockedSetting = [
@@ -97,9 +113,9 @@ class AspectRatioController {
 
         const [widthRatio, heightRatio] = this._clampToBoundaries(
             ...(
-                aspectRatio !== '🔓'
-                    ? aspectRatio.split(':')
-                    : lockedSetting
+                [_LOCK, _IMAGE].includes(aspectRatio)
+                    ? lockedSetting
+                    : aspectRatio.split(':')
             ).map(Number)
         )
 
@@ -109,25 +125,25 @@ class AspectRatioController {
             this.heightContainer.disable();
             this.widthContainer.enable();
             const minimum = Math.max(
-                Math.round(this.min * widthRatio / heightRatio), this.min
+                Math.round(_MINIMUM * widthRatio / heightRatio), _MINIMUM
             );
             this.widthContainer.updateMin(minimum);
-            this.heightContainer.updateMin(this.min);
+            this.heightContainer.updateMin(_MINIMUM);
         } else {
             this.widthContainer.disable();
             this.heightContainer.enable();
             const minimum = Math.max(
-                Math.round(this.min * heightRatio / widthRatio), this.min
+                Math.round(_MINIMUM * heightRatio / widthRatio), _MINIMUM
             );
             this.heightContainer.updateMin(minimum);
-            this.widthContainer.updateMin(this.min);
+            this.widthContainer.updateMin(_MINIMUM);
         }
 
         this._syncValues();
     }
 
     _syncValues(changedElement) {
-        if (this.aspectRatio === "Off") return;
+        if (this.aspectRatio === _OFF) return;
         if (!changedElement) {
             changedElement = {
                 value: Math.max(
@@ -154,8 +170,8 @@ class AspectRatioController {
 
     _clampToBoundaries(width, height) {
         const aspectRatio = width / height;
-        const MAX_DIMENSION = this.max;
-        const MIN_DIMENSION = this.min;
+        const MAX_DIMENSION = _MAXIMUM;
+        const MIN_DIMENSION = _MINIMUM;
         if (width > MAX_DIMENSION) {
             width = MAX_DIMENSION;
             height = Math.round(width / aspectRatio);
@@ -186,7 +202,7 @@ class AspectRatioController {
         return [width, height]
     }
 
-    static observeStartup(page, key) {
+    static observeStartup(page, key, defaultOption, defaultOptions) {
         let observer = new MutationObserver(() => {
             const widthContainer = gradioApp().querySelector(`#${page}_width`);
             const heightContainer = gradioApp().querySelector(`#${page}_height`);
@@ -201,12 +217,18 @@ class AspectRatioController {
                 wrapperDiv.setAttribute("id", `${page}_size_toolbox`);
                 wrapperDiv.setAttribute("class", "flex flex-col relative col gap-4");
                 wrapperDiv.setAttribute("style", "min-width: min(320px, 100%); flex-grow: 0");
+
+                const allOptions = [
+                    ...defaultOptions,
+                    ...window.opts.arh_javascript_aspect_ratio.split(','),
+                ].map(o => o.trim());
+
                 wrapperDiv.innerHTML = `
                 <div id="${page}_ratio" class="gr-block gr-box relative w-full border-solid border border-gray-200 gr-padded">
                   <select id="${page}_select_aspect_ratio" class="gr-box gr-input w-full disabled:cursor-not-allowed">
                   ${
-                      window.opts.arh_javascript_aspect_ratio.split(',').map(r => {
-                          return '<option class="ar-option">' + r.trim() + '</option>'
+                      [...new Set(allOptions)].map(r => {
+                          return '<option class="ar-option">' + r + '</option>'
                       }).join('\n')
                   }
                   </select>
@@ -217,13 +239,45 @@ class AspectRatioController {
                 parent.removeChild(switchBtn);
                 wrapperDiv.appendChild(switchBtn);
                 parent.insertBefore(wrapperDiv, parent.lastChild.previousElementSibling);
+                const controller = new AspectRatioController(widthContainer, heightContainer, defaultOption);
 
-                const controller = new AspectRatioController(widthContainer, heightContainer);
+                if (page === 'img2img') {
+                    const img2imgImageContainer = gradioApp().querySelector('#img2img_image');
+                    const scaleToImg2ImgImage = (e) => {
+                        const options = Array.from(aspectRatioSelect);
+                        const picked = options[aspectRatioSelect.selectedIndex].value;
+                        if (picked !== _IMAGE) return;
+
+                        const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+                        const img = new Image();
+                        img.src = URL.createObjectURL(files[0]);
+
+                        img.onload = () => {
+                            controller.setAspectRatio(`${img.naturalWidth}:${img.naturalHeight}`)
+                        };
+                    }
+
+                    const img2imgImageInputContainer = img2imgImageContainer.querySelector('input')
+                    img2imgImageInputContainer.parentElement.addEventListener('drop', scaleToImg2ImgImage)
+                    img2imgImageInputContainer.addEventListener('input', scaleToImg2ImgImage)
+                }
+
                 const aspectRatioSelect = gradioApp().getElementById(`${page}_select_aspect_ratio`);
+                const originalBGC = switchBtn.style.backgroundColor;
                 aspectRatioSelect.onchange = () => {
-                  const options = Array.from(aspectRatioSelect);
-                  const picked = options[aspectRatioSelect.selectedIndex].value;
-                  controller.setAspectRatio(picked);
+                    const options = Array.from(aspectRatioSelect);
+                    const picked = options[aspectRatioSelect.selectedIndex].value;
+
+                    if (_IMAGE === picked) {
+                        switchBtn.setAttribute('disabled', true)
+                        switchBtn.style.backgroundColor = 'black';
+                    } else if (switchBtn.getAttribute('disabled')) {
+                        switchBtn.removeAttribute('disabled')
+                        switchBtn.style.backgroundColor = originalBGC;
+                    } else {
+                        switchBtn.style.backgroundColor = originalBGC;
+                    }
+                    controller.setAspectRatio(picked);
                 };
 
                 switchBtn.onclick = () => {
@@ -236,7 +290,7 @@ class AspectRatioController {
                     });
                     const options = Array.from(aspectRatioSelect);
                     let picked = options[aspectRatioSelect.selectedIndex].value;
-                    if (picked === '🔓') {
+                    if (_LOCK === picked) {
                         picked = `${controller.heightRatio}:${controller.widthRatio}`
                     }
                     controller.setAspectRatio(picked);
@@ -252,9 +306,9 @@ class AspectRatioController {
 
 document.addEventListener("DOMContentLoaded", () => {
     window.__txt2imgAspectRatioController = AspectRatioController.observeStartup(
-        "txt2img", "__txt2imgAspectRatioController"
+        "txt2img", "__txt2imgAspectRatioController", _OFF, [_OFF, _LOCK]
     );
     window.__img2imgAspectRatioController = AspectRatioController.observeStartup(
-        "img2img", "__img2imgAspectRatioController"
+        "img2img", "__img2imgAspectRatioController", _OFF, [_OFF, _IMAGE, _LOCK]
     );
 });

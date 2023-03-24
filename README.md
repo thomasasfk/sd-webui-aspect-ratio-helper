@@ -11,12 +11,13 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
   - When selected, you will only be able to modify the higher dimension
     - The smaller or equivalent dimension will scale accordingly
   - If "Lock/🔒" is selected, the aspect ratio of the current dimensions will be kept
+  - If "Image/🖼️" is selected, the aspect ratio of the current image will be kept (img2img only)
   - If you click the "Swap/⇅" button, the current dimensions will swap
     - Configurable aspect ratios will also flip, reducing the need for duplication of config
 
 https://user-images.githubusercontent.com/22506439/227396634-7a63671a-fd38-419a-b734-a3d26647cc1d.mp4
 
-</br>
+<br/>
 
 - Scale to maximum dimension
   - Upon clicking, the width and height will scale according to the configured maximum value
@@ -42,8 +43,8 @@ https://user-images.githubusercontent.com/22506439/227396634-7a63671a-fd38-419a-
 - UI Component order (`MaxDimensionScaler, PredefinedAspectRatioButtons, PredefinedPercentageButtons`)
   - Determines the order in which the UI components will render
 - Enable JavaScript aspect ratio controls
-- JavaScript aspect ratio buttons `(Off, 🔓, 1:1, 4:3, 16:9, 9:16, 21:9)`
-  - i.e `Off, 🔓, 1:1, 4:3, 16:9, 9:16, 21:9`, `Off, 🔓, 9:2, 1:3`
+- JavaScript aspect ratio buttons `(1:1, 4:3, 16:9, 9:16, 21:9)`
+  - i.e `1:1, 4:3, 16:9, 9:16, 21:9` `2:3, 1:5, 3:5`
 - Show maximum dimension button (`True`)
 - Maximum dimension default (`1024`)
 - Show pre-defined aspect ratio buttons (`True`)
