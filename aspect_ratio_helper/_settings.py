@@ -27,6 +27,10 @@ OPT_KEY_TO_DEFAULT_MAP = {
     _constants.ARH_EXPAND_BY_DEFAULT_KEY: False,
     _constants.ARH_UI_COMPONENT_ORDER_KEY:
         DEFAULT_UI_COMPONENT_ORDER_KEY,
+    _constants.ARH_JAVASCRIPT_ASPECT_RATIO_SHOW_KEY: False,
+    _constants.ARH_JAVASCRIPT_ASPECT_RATIOS_KEY:
+        'Off, 🔓, 1:1, 3:2, 4:3, 5:4, 16:9, 1.85:1, 2.35:1, 2.39:1, 2.40:1, '
+        '21:9, 1.375:1, 1.66:1, 1.75:1',
     _constants.ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY: True,
     _constants.ARH_MAX_WIDTH_OR_HEIGHT_KEY:
         _constants.MAX_DIMENSION / 2,
@@ -83,8 +87,6 @@ def sort_components_by_keys(
 
 
 def on_ui_settings():
-    section = 'aspect_ratio_helper', _constants.EXTENSION_NAME
-
     # default ui options
     shared.opts.add_option(
         key=_constants.ARH_EXPAND_BY_DEFAULT_KEY,
@@ -93,7 +95,7 @@ def on_ui_settings():
                 _constants.ARH_EXPAND_BY_DEFAULT_KEY,
             ),
             label='Expand by default',
-            section=section,
+            section=_constants.SECTION,
         ),
     )
     shared.opts.add_option(
@@ -111,7 +113,28 @@ def on_ui_settings():
                     )
                 ],
             },
-            section=section,
+            section=_constants.SECTION,
+        ),
+    )
+    shared.opts.add_option(
+        key=_constants.ARH_JAVASCRIPT_ASPECT_RATIO_SHOW_KEY,
+        info=shared.OptionInfo(
+            default=OPT_KEY_TO_DEFAULT_MAP.get(
+                _constants.ARH_JAVASCRIPT_ASPECT_RATIO_SHOW_KEY,
+            ),
+            label='Enable JavaScript aspect ratio controls',
+            section=_constants.SECTION,
+        ),
+    )
+    shared.opts.add_option(
+        key=_constants.ARH_JAVASCRIPT_ASPECT_RATIOS_KEY,
+        info=shared.OptionInfo(
+            default=OPT_KEY_TO_DEFAULT_MAP.get(
+                _constants.ARH_JAVASCRIPT_ASPECT_RATIOS_KEY,
+            ),
+            label='JavaScript aspect ratio buttons'
+                  ' (Off, 🔓, 1:1, 4:3, 16:9, 9:16, 21:9)',
+            section=_constants.SECTION,
         ),
     )
 
