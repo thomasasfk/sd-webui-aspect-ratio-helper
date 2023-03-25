@@ -10,18 +10,23 @@
 }
 
 #txt2img_ratio select, #img2img_ratio select {
-   -o-appearance: none;
-   -ms-appearance: none;
-   -webkit-appearance: none;
-   -moz-appearance: none;
-   appearance: none;
-   background-image: unset;
-   padding-right: unset;
-   min-width: 40px;
-   max-width: 40px;
-   min-height: 40px;
-   max-height: 40px;
-   line-height: 40px;
-   padding: 0;
-   text-align: center;
+    font-family: 'Source Sans Pro', 'ui-sans-serif', 'system-ui', sans-serif;
+    tab-size: 4;
+    color: white;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.4;
+    box-sizing: border-box;
+    position: relative;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    background: #1f2937;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    padding-right: 1px;
+    margin-bottom: 10px;
+    padding-left: 2px;
+}
+
+.arh-btn-row button {
+    min-width: fit-content;
 }
