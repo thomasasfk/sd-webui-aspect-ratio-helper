@@ -74,7 +74,7 @@ JavaScript & accordion aspect ratios _might_ not play well together - I don't th
 
 Developed using existing [AUTOMATIC1111 webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) dependencies.
 
-It's recommended to use the python version specified by A111 webui.
+It's recommended to use the python version specified by A1111 webui.
 
 However - for running unit tests, we use pytest.
 

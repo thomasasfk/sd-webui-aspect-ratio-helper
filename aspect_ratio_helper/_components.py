@@ -122,6 +122,7 @@ class PredefinedAspectRatioButtons(ArhUIComponent):
         ), gr.Row(
             variant='compact',
             visible=self.should_show(),
+            elem_classes='arh-btn-row',
         ):
             for ar_str in aspect_ratios:
                 w, h, *_ = [abs(float(d)) for d in ar_str.split(':')]
@@ -205,6 +206,7 @@ class PredefinedPercentageButtons(ArhUIComponent):
         ), gr.Row(
             variant='compact',
             visible=self.should_show(),
+            elem_classes='arh-btn-row',
         ):
             pps = _settings.safe_opt(_constants.ARH_PREDEFINED_PERCENTAGES_KEY)
             percentages = [abs(int(x)) for x in pps.split(',')]
