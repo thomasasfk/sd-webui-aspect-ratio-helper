@@ -43,8 +43,14 @@ class ContainerController {
     }
 
     setVal(text) {
-        this.updateVal(text);
+        this.updateVal(
+            ContainerController.roundToClosestMultipleOf8(text)
+        );
         this.eventHandler();
+    }
+
+    static roundToClosestMultipleOf8(num) {
+        return Math.round(Number(num) / 8) * 8;
     }
 }
 
@@ -76,7 +82,6 @@ class AspectRatioController {
         };
 
         Object.values(this.dimensions).forEach(dimension => {
-            dimension.step = 1;
             dimension.addEventListener('change', (e) => {
                 e.preventDefault()
                 this._syncValues(dimension);
@@ -227,10 +232,10 @@ class AspectRatioController {
                 <div id="${page}_ratio" class="gr-block gr-box relative w-full border-solid border border-gray-200 gr-padded">
                   <select id="${page}_select_aspect_ratio" class="gr-box gr-input w-full disabled:cursor-not-allowed">
                   ${
-                      [...new Set(allOptions)].map(r => {
-                          return '<option class="ar-option">' + r + '</option>'
-                      }).join('\n')
-                  }
+                    [...new Set(allOptions)].map(r => {
+                        return '<option class="ar-option">' + r + '</option>'
+                    }).join('\n')
+                }
                   </select>
                 </div>
                 `;
