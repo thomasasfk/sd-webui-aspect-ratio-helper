@@ -26,6 +26,7 @@
     margin-bottom: 10px;
     padding-left: 2px;
     text-align: center;
+    min-width: 2.5em;
 }
 
 .arh-btn-row button {
