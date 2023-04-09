@@ -26,12 +26,10 @@ const getCurrentImage = () => {
     return document.getElementById(currentTabImageId).querySelector('img');
 }
 
-// utility functions
 const roundToClosestMultiple = (num, multiple) => {
-    const rounded =  Math.round(Number(num) / multiple) * multiple;
+    const rounded = Math.round(Number(num) / multiple) * multiple;
     return rounded;
 }
-
 
 const aspectRatioFromStr = (ar) => {
     if (!ar.includes(':')) return;
@@ -80,34 +78,35 @@ const reverseAllOptions = () => {
     });
 }
 
-class SelectController {
+class OptionPickingController {
     constructor(page, defaultOptions, controller) {
         this.page = page;
-        this.options = [...new Set([...defaultOptions, ...getOptions()])];
+        this.options = this.getOptions(defaultOptions);
         this.switchButton = gradioApp().getElementById(page + '_res_switch_btn');
 
         const wrapperDiv = document.createElement('div');
         wrapperDiv.setAttribute("id", `${this.page}_size_toolbox`);
         wrapperDiv.setAttribute("class", "flex flex-col relative col gap-4");
         wrapperDiv.setAttribute("style", "min-width: min(320px, 100%); flex-grow: 0");
-        wrapperDiv.innerHTML = `
-        <div id="${this.page}_ratio" class="gr-block gr-box relative w-full border-solid border border-gray-200 gr-padded">
-            <select id="${this.page}_select_aspect_ratio" class="gr-box gr-input w-full disabled:cursor-not-allowed">
-                ${this.options.map(r => {
-                    return '<option class="ar-option">' + r + '</option>'
-                }).join('\n')}
-            </select>
-        </div>
-        `;
+        wrapperDiv.innerHTML = this.getElementInnerHTML();
 
         const parent = this.switchButton.parentNode;
         parent.removeChild(this.switchButton);
         wrapperDiv.appendChild(this.switchButton);
         parent.insertBefore(wrapperDiv, parent.lastChild.previousElementSibling);
 
+        this.getPickerElement().onchange = this.pickerChanged(controller);
+        this.switchButton.onclick = this.switchButtonOnclick(controller);
+    }
+
+    getOptions(defaultOptions) {
+        return [...new Set([...defaultOptions, ...getOptions()])];
+    }
+
+    pickerChanged(controller) {
         const originalBGC = this.switchButton.style.backgroundColor;
-        this.getSelectElement().onchange = () => {
-            const picked  = this.getCurrentOption();
+        return () => {
+            const picked = this.getCurrentOption();
             if (_IMAGE === picked) {
                 this.switchButton.disabled = true;
                 this.switchButton.style.backgroundColor = 'black';
@@ -118,8 +117,10 @@ class SelectController {
 
             controller.setAspectRatio(picked);
         };
+    }
 
-        this.switchButton.onclick = () => {
+    switchButtonOnclick(controller) {
+        return () => {
             reverseAllOptions();
             const picked = this.getCurrentOption();
             if (_LOCK === picked) {
@@ -130,16 +131,87 @@ class SelectController {
         };
     }
 
-    getSelectElement() {
+    getElementInnerHTML() {
+        throw new Error('Not implemented');
+    }
+
+    getPickerElement() {
+        throw new Error('Not implemented');
+    }
+
+    getCurrentOption() {
+        throw new Error('Not implemented');
+    }
+}
+
+
+class SelectOptionPickingController extends OptionPickingController {
+    constructor(page, defaultOptions, controller) {
+        super(page, defaultOptions, controller);
+    }
+
+    getElementInnerHTML() {
+        return `
+        <div id="${this.page}_ratio" class="gr-block gr-box relative w-full border-solid border border-gray-200 gr-padded">
+            <select id="${this.page}_select_aspect_ratio" class="gr-box gr-input w-full disabled:cursor-not-allowed">
+                ${this.options.map(r => {
+            return '<option class="ar-option">' + r + '</option>'
+        }).join('\n')}
+            </select>
+        </div>
+        `;
+    }
+
+    getPickerElement() {
         return gradioApp().getElementById(`${this.page}_select_aspect_ratio`);
     }
 
     getCurrentOption() {
-        const selectElement = this.getSelectElement();
+        const selectElement = this.getPickerElement();
         const options = Array.from(selectElement);
         return options[selectElement.selectedIndex].value;
     }
 }
+
+class DefaultOptionsButtonOptionPickingController extends OptionPickingController {
+    constructor(page, defaultOptions, controller) {
+        super(page, defaultOptions, controller);
+        this.currentIndex = 0;
+        this.getPickerElement().onclick = this.pickerChanged(controller);
+    }
+
+    pickerChanged(controller) {
+        return () => {
+            this.currentIndex = (this.currentIndex + 1) % this.options.length;
+            this.getPickerElement().querySelector('button').textContent = this.getCurrentOption();
+            super.pickerChanged(controller)();
+        }
+    }
+
+    getElementInnerHTML() {
+        const classes = Array.from(this.switchButton.classList);
+        return `
+        <div id="${this.page}_ar_default_options_button" style="margin-bottom: 10px;">
+            <button class="${classes.join(' ')}">
+                ${this.getCurrentOption()}
+            </button>
+        </div>
+        `;
+    }
+
+    getPickerElement() {
+        return gradioApp().getElementById(`${this.page}_ar_default_options_button`);
+    }
+
+    getOptions(defaultOptions) {
+        return defaultOptions;
+    }
+
+    getCurrentOption() {
+        return this.options[this.currentIndex || 0];
+    }
+}
+
 
 class SliderController {
     constructor(element) {
@@ -201,7 +273,12 @@ class AspectRatioController {
             });
         })
 
-        this.selectController = new SelectController(page, defaultOptions, this);
+        if (window.opts.arh_ui_javascript_selection_method === 'Default Options Button') {
+            this.optionPickingControler = new DefaultOptionsButtonOptionPickingController(page, defaultOptions, this);
+        } else {
+            this.optionPickingControler = new SelectOptionPickingController(page, defaultOptions, this);
+        }
+
         this.setAspectRatio(_OFF);
     }
 
@@ -278,11 +355,17 @@ class AspectRatioController {
 
         const [width, height] = clampToBoundaries(w, h)
 
-        const inputEvent = new Event("input", { bubbles: true});
+        const inputEvent = new Event("input", {bubbles: true});
         this.widthContainer.setVal(width);
         this.widthContainer.triggerEvent(inputEvent);
         this.heightContainer.setVal(height);
         this.heightContainer.triggerEvent(inputEvent);
+        this.heightContainer.inputs.forEach(input => {
+            dimensionChange({target: input}, false, true);
+        });
+        this.widthContainer.inputs.forEach(input => {
+            dimensionChange({target: input}, true, false);
+        });
     }
 
     static observeStartup(key, page, defaultOptions, postSetup = (_) => {}) {
@@ -291,7 +374,7 @@ class AspectRatioController {
             const heightContainer = gradioApp().querySelector(`#${page}_height`);
 
             // wait for width and height containers to exist.
-            if (widthContainer && heightContainer)  {
+            if (widthContainer && heightContainer) {
                 observer.disconnect();
                 if (!window.opts.arh_javascript_aspect_ratio_show) {
                     return;
@@ -319,7 +402,7 @@ const addImg2ImgTabSwitchClickListeners = (controller) => {
     img2imgTabButtons.forEach(button => {
         button.addEventListener('click', (_) => {
             // set aspect ratio is RECALLED to change to the image specific to the newly selected tab.
-            if (controller.selectController.getCurrentOption() === _IMAGE) {
+            if (controller.optionPickingControler.getCurrentOption() === _IMAGE) {
                 controller.setAspectRatio(_IMAGE);
             }
 
@@ -332,7 +415,7 @@ const addImg2ImgTabSwitchClickListeners = (controller) => {
 
 const postImageControllerSetupFunction = (controller) => {
     const scaleToImg2ImgImage = (e) => {
-        const picked = controller.selectController.getCurrentOption();
+        const picked = controller.optionPickingControler.getCurrentOption();
         if (picked !== _IMAGE) return;
         const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
         const img = new Image();
@@ -361,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
     AspectRatioController.observeStartup(
         "__img2imgAspectRatioController",
         "img2img",
-        [_OFF, _IMAGE, _LOCK],
+        [_OFF, _LOCK, _IMAGE],
         postImageControllerSetupFunction
     );
 });
