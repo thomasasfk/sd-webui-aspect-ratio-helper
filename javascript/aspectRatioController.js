@@ -360,12 +360,12 @@ class AspectRatioController {
         this.widthContainer.triggerEvent(inputEvent);
         this.heightContainer.setVal(height);
         this.heightContainer.triggerEvent(inputEvent);
-
-        if (this.isLandscapeOrSquare()) {
-            dimensionChange({target: this.heightContainer.rangeInput}, false, true);
-        } else {
-            dimensionChange({target: this.widthContainer.rangeInput}, true, false);
-        }
+        this.heightContainer.inputs.forEach(input => {
+            dimensionChange({target: input}, false, true);
+        });
+        this.widthContainer.inputs.forEach(input => {
+            dimensionChange({target: input}, true, false);
+        });
     }
 
     static observeStartup(key, page, defaultOptions, postSetup = (_) => {}) {
