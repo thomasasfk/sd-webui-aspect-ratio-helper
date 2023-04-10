@@ -428,7 +428,7 @@ const postImageControllerSetupFunction = (controller) => {
         const imageContainer = document.getElementById(imageContainerId);
         const inputElement = imageContainer.querySelector('input');
         inputElement.parentElement.addEventListener('drop', scaleToImg2ImgImage);
-        inputElement.addEventListener('input', scaleToImg2ImgImage);
+        inputElement.addEventListener('change', scaleToImg2ImgImage);
     })
 
     addImg2ImgTabSwitchClickListeners(controller);
