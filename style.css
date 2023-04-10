@@ -1,4 +1,4 @@
-#txt2img_size_toolbox, #img2img_size_toolbox{
+#txt2img_size_toolbox, #img2img_size_toolbox {
     min-width: unset !important;
     gap: 0;
 }
@@ -10,17 +10,19 @@
 }
 
 #txt2img_ratio select, #img2img_ratio select {
-    font-family: 'Source Sans Pro', 'ui-sans-serif', 'system-ui', sans-serif;
+    background: var(--background-fill-primary);
+    border: 1px solid var(--block-border-color);
+    color: var(--block-label-text-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
     tab-size: 4;
-    color: white;
-    font-weight: 400;
     font-size: 14px;
     line-height: 1.4;
     box-sizing: border-box;
     position: relative;
-    border: 1px solid #374151;
     border-radius: 8px;
-    background: #1f2937;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     padding-right: 1px;
     margin-bottom: 10px;

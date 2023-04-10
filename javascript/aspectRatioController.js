@@ -1,28 +1,29 @@
 // constants
 const _OFF = "Off";  // Don't use the functionality at all
-const _LOCK = '🔓';  // Aspect ratio is "locked"
+const _LOCK = '🔒';  // Aspect ratio is "locked"
 const _IMAGE = '🖼️'; // Aspect ratio is "locked" to that of the image
 
 const _MAXIMUM_DIMENSION = 2048;
 const _MINIMUM_DIMENSION = 64;
 
-const _TAB_STRING_TO_IMAGE_ID_MAP = {
-    'img2img': 'img2img_image',
-    'sketch': 'img2img_sketch',
-    'inpaint': 'img2maskimg',
-    'inpaint sketch': 'inpaint_sketch',
-    'inpaint upload': 'img_inpaint_base',
-}
-
-const _IMAGE_INPUT_CONTAINER_IDS = Array.from(Object.values(_TAB_STRING_TO_IMAGE_ID_MAP));
+const _IMAGE_INPUT_CONTAINER_IDS = [
+    'img2img_image',
+    'img2img_sketch',
+    'img2maskimg',
+    'inpaint_sketch',
+    'img_inpaint_base',
+];
 
 const getSelectedImage2ImageTab = () => {
-    return document.querySelector('#img2img_settings > div > div > button.selected').textContent.toLowerCase().trim();
+    const selectedButton = gradioApp().getElementById('mode_img2img').querySelector('button.selected');
+    const allButtons = gradioApp().getElementById('mode_img2img').querySelectorAll('button');
+    const selectedIndex = Array.prototype.indexOf.call(allButtons, selectedButton);
+    return selectedIndex;
 }
 
 const getCurrentImage = () => {
-    const currentTab = getSelectedImage2ImageTab();
-    const currentTabImageId = _TAB_STRING_TO_IMAGE_ID_MAP[currentTab];
+    const currentTabIndex = getSelectedImage2ImageTab();
+    const currentTabImageId = _IMAGE_INPUT_CONTAINER_IDS[currentTabIndex];
     return document.getElementById(currentTabImageId).querySelector('img');
 }
 
@@ -104,15 +105,12 @@ class OptionPickingController {
     }
 
     pickerChanged(controller) {
-        const originalBGC = this.switchButton.style.backgroundColor;
         return () => {
             const picked = this.getCurrentOption();
             if (_IMAGE === picked) {
                 this.switchButton.disabled = true;
-                this.switchButton.style.backgroundColor = 'black';
             } else {
                 this.switchButton.removeAttribute('disabled')
-                this.switchButton.style.backgroundColor = originalBGC;
             }
 
             controller.setAspectRatio(picked);
@@ -368,7 +366,8 @@ class AspectRatioController {
         });
     }
 
-    static observeStartup(key, page, defaultOptions, postSetup = (_) => {}) {
+    static observeStartup(key, page, defaultOptions, postSetup = (_) => {
+    }) {
         let observer = new MutationObserver(() => {
             const widthContainer = gradioApp().querySelector(`#${page}_width`);
             const heightContainer = gradioApp().querySelector(`#${page}_height`);
