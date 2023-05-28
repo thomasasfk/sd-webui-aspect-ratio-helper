@@ -58,6 +58,17 @@ def scale_dimensions_to_max_dim(
     return scale_dimensions_to_ar(width, height, max_dim, aspect_ratio)
 
 
+def scale_dimensions_to_min_dim(
+        width, height, min_dim,
+) -> tuple[int, int]:
+    aspect_ratio = float(width) / float(height)
+    if width >= height:
+        max_dim = min_dim * aspect_ratio
+    else:
+        max_dim = min_dim / aspect_ratio
+    return scale_dimensions_to_ar(width, height, max_dim, aspect_ratio)
+
+
 def scale_dimensions_to_ar(
         width, height, max_dim, aspect_ratio,
 ) -> tuple[int, int]:
@@ -70,7 +81,12 @@ def scale_dimensions_to_ar(
     return clamp_to_boundaries(new_width, new_height, aspect_ratio)
 
 
-def clamp_to_boundaries(width, height, aspect_ratio) -> tuple[int, int]:
+def round_to_multiple_of_8(value):
+    return int(round(value / 8.0)) * 8
+
+
+def clamp_to_boundaries(owidth, oheight, aspect_ratio) -> tuple[int, int]:
+    width, height = owidth, oheight
     if width > _const.MAX_DIMENSION:
         width = _const.MAX_DIMENSION
         height = int(round(width / aspect_ratio))
@@ -84,6 +100,8 @@ def clamp_to_boundaries(width, height, aspect_ratio) -> tuple[int, int]:
         height = _const.MIN_DIMENSION
         width = int(round(height * aspect_ratio))
 
+    width = round_to_multiple_of_8(width)
+    height = round_to_multiple_of_8(height)
     # for insane aspect ratios we don't support... i.e 1:100
     # 64:6400 when run through this function, so we clamp to 64:2048 (‾◡◝)
     # also.  when the user does this it breaks the "scale to max" function
