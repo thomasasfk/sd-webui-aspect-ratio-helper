@@ -17,6 +17,7 @@ PREDEFINED_PERCENTAGES_DISPLAY_MAP = {
 
 COMPONENTS = (
     _components.MaxDimensionScaler,
+    _components.MinDimensionScaler,
     _components.PredefinedAspectRatioButtons,
     _components.PredefinedPercentageButtons,
 )
@@ -36,6 +37,9 @@ OPT_KEY_TO_DEFAULT_MAP = {
         '1:1, 3:2, 4:3, 5:4, 16:9',
     _constants.ARH_SHOW_MAX_WIDTH_OR_HEIGHT_KEY: False,
     _constants.ARH_MAX_WIDTH_OR_HEIGHT_KEY:
+        _constants.MAX_DIMENSION / 2,
+    _constants.ARH_SHOW_MIN_WIDTH_OR_HEIGHT_KEY: False,
+    _constants.ARH_MIN_WIDTH_OR_HEIGHT_KEY:
         _constants.MAX_DIMENSION / 2,
     _constants.ARH_SHOW_PREDEFINED_PERCENTAGES_KEY: False,
     _constants.ARH_PREDEFINED_PERCENTAGES_KEY:
@@ -161,7 +165,7 @@ def on_ui_settings():
             component=gr.Dropdown,
             component_args=lambda: {
                 'choices': [
-                    ', '.join(p) for p in itertools.permutations(
+                    ', '.join(p) for p in itertools.permutations(  # TODO:  Rethink this, exponential growth...
                         DEFAULT_UI_COMPONENT_ORDER_KEY_LIST,
                     )
                 ],

@@ -6,6 +6,8 @@ Install via the extensions tab on the [AUTOMATIC1111 webui](https://github.com/A
 
 ## Features
 
+**(note this list is a little out of date, will need to find time to update it)**
+
 - JavaScript aspect ratio controls
   - Adds a dropdown of configurable aspect ratios, to which the dimensions will auto-scale
   - When selected, you will only be able to modify the higher dimension

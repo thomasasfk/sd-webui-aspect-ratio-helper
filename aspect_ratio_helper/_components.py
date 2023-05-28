@@ -51,7 +51,7 @@ class MaxDimensionScaler(ArhUIComponent):
             max_dimension_slider = gr.inputs.Slider(
                 minimum=_constants.MIN_DIMENSION,
                 maximum=_constants.MAX_DIMENSION,
-                step=1,
+                step=8,
                 default=max_dim_default,
                 label='Maximum dimension',
             )
@@ -101,7 +101,86 @@ class MaxDimensionScaler(ArhUIComponent):
                 component_args={
                     'minimum': _constants.MIN_DIMENSION,
                     'maximum': _constants.MAX_DIMENSION,
-                    'step': 1,
+                    'step': 8,
+                },
+                section=_constants.SECTION,
+            ),
+        )
+
+
+class MinDimensionScaler(ArhUIComponent):
+
+    def render(self):
+        min_dim_default = _settings.safe_opt(
+            _constants.ARH_MAX_WIDTH_OR_HEIGHT_KEY,
+        )
+        self.script.min_dimension = float(min_dim_default)
+
+        inputs = outputs = [self.script.wc, self.script.hc]
+
+        with gr.Row(
+                visible=self.should_show(),
+        ):
+            min_dim_default = _settings.safe_opt(
+                _constants.ARH_MAX_WIDTH_OR_HEIGHT_KEY,
+            )
+            # todo: when using gr.Slider (not deprecated), the default value
+            #  is somehow always 270?... can't figure out why.
+            #  using legacy inputs.Slider for now as it doesn't have the issue.
+            min_dimension_slider = gr.inputs.Slider(
+                minimum=_constants.MIN_DIMENSION,
+                maximum=_constants.MAX_DIMENSION,
+                step=8,
+                default=min_dim_default,
+                label='Minimum dimension',
+            )
+
+            def _update_min_dimension(_min_dimension):
+                self.script.min_dimension = _min_dimension
+
+            min_dimension_slider.change(
+                _update_min_dimension,
+                inputs=[min_dimension_slider],
+                show_progress=False,
+            )
+
+            gr.Button(
+                value='Scale to minimum dimension',
+                visible=self.should_show(),
+            ).click(
+                fn=_util.scale_dimensions_to_min_dim,
+                inputs=[*inputs, min_dimension_slider],
+                outputs=outputs,
+            )
+
+    @staticmethod
+    def should_show() -> bool:
+        return _settings.safe_opt(_constants.ARH_SHOW_MIN_WIDTH_OR_HEIGHT_KEY)
+
+    @staticmethod
+    def add_options(shared):
+        shared.opts.add_option(
+            key=_constants.ARH_SHOW_MIN_WIDTH_OR_HEIGHT_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_SHOW_MIN_WIDTH_OR_HEIGHT_KEY,
+                ),
+                label='Show minimum dimension button',
+                section=_constants.SECTION,
+            ),
+        )
+        shared.opts.add_option(
+            key=_constants.ARH_MIN_WIDTH_OR_HEIGHT_KEY,
+            info=shared.OptionInfo(
+                default=_settings.OPT_KEY_TO_DEFAULT_MAP.get(
+                    _constants.ARH_MIN_WIDTH_OR_HEIGHT_KEY,
+                ),
+                label='Minimum dimension default',
+                component=gr.Slider,
+                component_args={
+                    'minimum': _constants.MIN_DIMENSION,
+                    'maximum': _constants.MAX_DIMENSION,
+                    'step': 8,
                 },
                 section=_constants.SECTION,
             ),
