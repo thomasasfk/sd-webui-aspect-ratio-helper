@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC
 from abc import abstractmethod
 from functools import partial
@@ -125,7 +127,7 @@ class PredefinedAspectRatioButtons(ArhUIComponent):
             elem_classes='arh-btn-row',
         ):
             for ar_str in aspect_ratios:
-                w, h, *_ = [abs(float(d)) for d in ar_str.split(':')]
+                w, h, *_ = (abs(float(d)) for d in ar_str.split(':'))
 
                 inputs = []
                 if use_max_dim_op:

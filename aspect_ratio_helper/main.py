@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gradio as gr
 from modules import script_callbacks
 from modules import scripts
