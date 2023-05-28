@@ -93,6 +93,12 @@ def clamp_to_boundaries(owidth, oheight, aspect_ratio) -> tuple[int, int]:
     if height > _const.MAX_DIMENSION:
         height = _const.MAX_DIMENSION
         width = int(round(height * aspect_ratio))
+    if width < _const.MIN_DIMENSION:
+        width = _const.MIN_DIMENSION
+        height = int(round(width / aspect_ratio))
+    if height < _const.MIN_DIMENSION:
+        height = _const.MIN_DIMENSION
+        width = int(round(height * aspect_ratio))
 
     width = round_to_multiple_of_8(width)
     height = round_to_multiple_of_8(height)

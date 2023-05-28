@@ -112,7 +112,7 @@ class MinDimensionScaler(ArhUIComponent):
 
     def render(self):
         min_dim_default = _settings.safe_opt(
-            _constants.ARH_MAX_WIDTH_OR_HEIGHT_KEY,
+            _constants.ARH_MIN_WIDTH_OR_HEIGHT_KEY,
         )
         self.script.min_dimension = float(min_dim_default)
 
@@ -122,7 +122,7 @@ class MinDimensionScaler(ArhUIComponent):
                 visible=self.should_show(),
         ):
             min_dim_default = _settings.safe_opt(
-                _constants.ARH_MAX_WIDTH_OR_HEIGHT_KEY,
+                _constants.ARH_MIN_WIDTH_OR_HEIGHT_KEY,
             )
             # todo: when using gr.Slider (not deprecated), the default value
             #  is somehow always 270?... can't figure out why.
