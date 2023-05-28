@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 import aspect_ratio_helper._constants as _constants
