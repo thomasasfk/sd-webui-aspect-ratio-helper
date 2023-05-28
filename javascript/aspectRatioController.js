@@ -55,10 +55,14 @@ const clampToBoundaries = (width, height) => {
 
     if (width > _MAXIMUM_DIMENSION) {
         width = _MAXIMUM_DIMENSION;
+    } else if (width < _MINIMUM_DIMENSION) {
+        width = _MINIMUM_DIMENSION;
     }
 
     if (height < _MINIMUM_DIMENSION) {
         height = _MINIMUM_DIMENSION;
+    } else if (height > _MAXIMUM_DIMENSION) {
+        height = _MAXIMUM_DIMENSION;
     }
 
     return [width, height];
@@ -108,7 +112,7 @@ class OptionPickingController {
         return () => {
             const picked = this.getCurrentOption();
             if (_IMAGE === picked) {
-                this.switchButton.disabled = true;
+                // this.switchButton.disabled = true;
             } else {
                 this.switchButton.removeAttribute('disabled')
             }
@@ -213,26 +217,17 @@ class DefaultOptionsButtonOptionPickingController extends OptionPickingControlle
 
 class SliderController {
     constructor(element) {
-        this.element = element
+        this.element = element;
         this.numberInput = this.element.querySelector('input[type=number]');
         this.rangeInput = this.element.querySelector('input[type=range]');
         this.inputs = [this.numberInput, this.rangeInput];
+        this.inputs.forEach(input => {
+            input.isWidth = element.isWidth;
+        });
     }
 
     getVal() {
         return Number(this.numberInput.value);
-    }
-
-    disable() {
-        this.inputs.forEach(input => {
-            input.disabled = true
-        })
-    }
-
-    enable() {
-        this.inputs.forEach(input => {
-            input.disabled = false
-        })
     }
 
     updateVal(value) {
@@ -244,6 +239,12 @@ class SliderController {
     updateMin(value) {
         this.inputs.forEach(input => {
             input.min = roundToClosestMultiple(Number(value), 8);
+        })
+    }
+
+    updateMax(value) {
+        this.inputs.forEach(input => {
+            input.max = roundToClosestMultiple(Number(value), 8);
         })
     }
 
@@ -261,6 +262,8 @@ class SliderController {
 
 class AspectRatioController {
     constructor(page, widthContainer, heightContainer, defaultOptions) {
+        widthContainer.isWidth = true;
+        heightContainer.isWidth = false;
         this.widthContainer = new SliderController(widthContainer);
         this.heightContainer = new SliderController(heightContainer);
         this.inputs = [...this.widthContainer.inputs, ...this.heightContainer.inputs];
@@ -282,27 +285,37 @@ class AspectRatioController {
 
     updateInputStates() {
         if (this.isLandscapeOrSquare()) {
-            this.heightContainer.disable();
-            this.widthContainer.enable();
-            const minByAr = Math.round(_MINIMUM_DIMENSION * this.widthRatio / this.heightRatio);
-            const minimum = Math.max(minByAr, _MINIMUM_DIMENSION);
-            this.widthContainer.updateMin(minimum);
+            const AR = this.widthRatio / this.heightRatio;
+
+            const minWidthByAr = Math.round(_MINIMUM_DIMENSION * AR);
+            const minWidth = Math.max(minWidthByAr, _MINIMUM_DIMENSION);
+            this.widthContainer.updateMin(minWidth);
             this.heightContainer.updateMin(_MINIMUM_DIMENSION);
+
+            const maxHeightByAr = Math.round(_MAXIMUM_DIMENSION / AR)
+            const maxHeight = Math.min(_MAXIMUM_DIMENSION, maxHeightByAr);
+            this.heightContainer.updateMax(maxHeight);
+            this.widthContainer.updateMax(_MAXIMUM_DIMENSION);
         } else {
-            this.widthContainer.disable();
-            this.heightContainer.enable();
-            const minByAr = Math.round(_MINIMUM_DIMENSION * this.heightRatio / this.widthRatio)
-            const minimum = Math.max(minByAr, _MINIMUM_DIMENSION);
-            this.heightContainer.updateMin(minimum);
+            const AR = this.heightRatio / this.widthRatio;
+
+            const minHeightByAr = Math.round(_MINIMUM_DIMENSION * AR)
+            const minHeight = Math.max(minHeightByAr, _MINIMUM_DIMENSION);
+            this.heightContainer.updateMin(minHeight);
             this.widthContainer.updateMin(_MINIMUM_DIMENSION);
+
+            const maxWidthByAr = Math.round(_MAXIMUM_DIMENSION / AR)
+            const maxWidth = Math.min(_MAXIMUM_DIMENSION, maxWidthByAr);
+            this.widthContainer.updateMax(maxWidth);
+            this.heightContainer.updateMax(_MAXIMUM_DIMENSION);
         }
     }
 
     disable() {
-        this.widthContainer.enable();
-        this.heightContainer.enable();
         this.widthContainer.updateMin(_MINIMUM_DIMENSION);
         this.heightContainer.updateMin(_MINIMUM_DIMENSION);
+        this.widthContainer.updateMax(_MAXIMUM_DIMENSION);
+        this.heightContainer.updateMax(_MAXIMUM_DIMENSION);
     }
 
     isLandscapeOrSquare() {
@@ -343,12 +356,24 @@ class AspectRatioController {
 
         const aspectRatio = this.widthRatio / this.heightRatio;
         let w, h;
-        if (this.isLandscapeOrSquare()) {
-            w = Math.round(changedElement.value);
-            h = Math.round(changedElement.value / aspectRatio);
+
+        if (changedElement.isWidth === undefined) {
+            if (this.isLandscapeOrSquare()) {
+                if (changedElement.isWidth) {}
+                w = Math.round(changedElement.value);
+                h = Math.round(changedElement.value / aspectRatio);
+            } else {
+                h = Math.round(changedElement.value);
+                w = Math.round(changedElement.value * aspectRatio);
+            }
         } else {
-            h = Math.round(changedElement.value);
-            w = Math.round(changedElement.value * aspectRatio);
+            if (changedElement.isWidth) {
+                w = Math.round(changedElement.value);
+                h = Math.round(changedElement.value / aspectRatio);
+            } else {
+                h = Math.round(changedElement.value);
+                w = Math.round(changedElement.value * aspectRatio);
+            }
         }
 
         const [width, height] = clampToBoundaries(w, h)
