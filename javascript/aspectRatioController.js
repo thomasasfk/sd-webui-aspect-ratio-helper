@@ -398,7 +398,7 @@ class AspectRatioController {
             const heightContainer = gradioApp().querySelector(`#${page}_height`);
 
             // wait for width and height containers to exist.
-            if (widthContainer && heightContainer) {
+            if (widthContainer && heightContainer && window.opts && window.opts.arh_javascript_aspect_ratio_show !== undefined) {
                 observer.disconnect();
                 if (!window.opts.arh_javascript_aspect_ratio_show) {
                     return;
