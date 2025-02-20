@@ -1,3 +1,10 @@
+# ⚠️ Repository Status: Archived
+
+This repository has been archived and is no longer actively maintained. The project was originally created as a personal extension for Stable Diffusion Web UI. I am no longer using or developing it. Feel free to fork this repository if you'd like to continue development or create your own version, though there may be more current alternatives available for Stable Diffusion Web UI.
+
+
+---
+
 # Aspect Ratio Helper  [![pytest](https://github.com/thomasasfk/sd-webui-aspect-ratio-helper/actions/workflows/pytest.yml/badge.svg?branch=main)](https://github.com/thomasasfk/sd-webui-aspect-ratio-helper/actions/workflows/pytest.yml)
 
 Simple extension to easily maintain aspect ratio while changing dimensions.
